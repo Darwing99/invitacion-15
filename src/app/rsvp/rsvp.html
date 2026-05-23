@@ -1,0 +1,143 @@
+<section class="rsvp" id="rsvp">
+  <div class="rsvp__header">
+    <h2 class="rsvp__title">Confirmar asistencia</h2>
+    <p class="rsvp__sub">
+      Ingresa tu número de teléfono<br>para ver tu invitación y confirmar
+    </p>
+  </div>
+
+  <!-- ── PASO 1: Buscar por teléfono ── -->
+  @if (paso === 'buscar') {
+    <div class="rsvp__form">
+      <div class="rsvp__field">
+        <label for="telefono">
+          <i class="fa-solid fa-mobile-screen-button"></i> Número de teléfono
+        </label>
+        <div class="rsvp__tel-row">
+          <select class="rsvp__prefix" [(ngModel)]="prefijo" name="prefijo">
+            @for (p of prefijos; track p.code) {
+              <option [value]="p.code">{{ p.flag }} {{ p.code }}</option>
+            }
+          </select>
+          <input
+            id="telefono"
+            class="rsvp__tel-input"
+            type="tel"
+            placeholder="612 345 678"
+            [(ngModel)]="telefono"
+            name="telefono"
+            (keyup.enter)="buscar()"
+          />
+        </div>
+      </div>
+
+      @if (errorMsg) {
+        <p class="rsvp__error">
+          <i class="fa-solid fa-triangle-exclamation"></i> {{ errorMsg }}
+        </p>
+      }
+
+      <button class="rsvp__btn" (click)="buscar()" [disabled]="buscando || !telefono">
+        @if (buscando) {
+          <i class="fa-solid fa-spinner fa-spin"></i> Buscando...
+        } @else {
+          <i class="fa-solid fa-magnifying-glass"></i> Buscar mi invitación
+        }
+      </button>
+    </div>
+  }
+
+  <!-- ── PASO 1b: Ya confirmó antes ── -->
+  @if (paso === 'ya-confirmado' && confirmacionPrevia) {
+    <div class="rsvp__success">
+      <span class="rsvp__success-icon">✅</span>
+      <h3>¡Ya confirmaste, {{ confirmacionPrevia.nombre }}!</h3>
+      @if (confirmacionPrevia.asistencia === 'si') {
+        <p>
+          Tu asistencia está registrada para
+          <strong>{{ confirmacionPrevia.invitados }}</strong>
+          {{ confirmacionPrevia.invitados === 1 ? 'persona' : 'personas' }}.
+          ¡Te esperamos!
+        </p>
+      } @else {
+        <p>Registramos que no podrás asistir. ¡Gracias por avisarnos!</p>
+      }
+    </div>
+  }
+
+  <!-- ── PASO 1c: No encontrado ── -->
+  @if (paso === 'no-encontrado') {
+    <div class="rsvp__success">
+      <span class="rsvp__success-icon">🔍</span>
+      <h3>No te encontramos</h3>
+      <p>
+        No encontramos ese número. Verifica que sea el mismo
+        con el que te enviamos la invitación.
+      </p>
+      <button class="rsvp__btn rsvp__btn--outline" (click)="reintentar()">
+        <i class="fa-solid fa-rotate-left"></i> Intentar de nuevo
+      </button>
+    </div>
+  }
+
+  <!-- ── PASO 2: Confirmar asistencia ── -->
+  @if (paso === 'confirmar' && invitadoEncontrado) {
+    <div class="rsvp__form">
+      <div class="rsvp__found">
+        <span class="rsvp__found-icon">🌸</span>
+        <p class="rsvp__found-name">¡Hola, {{ invitadoEncontrado.nombre }}!</p>
+        <p class="rsvp__found-info">
+          Tu invitación es para
+          <strong>{{ invitadoEncontrado.invitados }}</strong>
+          {{ invitadoEncontrado.invitados === 1 ? 'persona' : 'personas' }}
+        </p>
+      </div>
+
+      <div class="rsvp__field">
+        <label>¿Asistirás a la fiesta?</label>
+        <div class="rsvp__radio-group">
+          <label class="rsvp__radio" [class.active]="asistencia === 'si'">
+            <input type="radio" [(ngModel)]="asistencia" name="asistencia" value="si" />
+            <i class="fa-solid fa-heart"></i> Sí, asistiré
+          </label>
+          <label class="rsvp__radio" [class.active]="asistencia === 'no'">
+            <input type="radio" [(ngModel)]="asistencia" name="asistencia" value="no" />
+            <i class="fa-regular fa-face-sad-tear"></i> No podré ir
+          </label>
+        </div>
+      </div>
+
+      <button class="rsvp__btn" (click)="confirmar()"
+        [disabled]="enviando || !asistencia">
+        @if (enviando) {
+          <i class="fa-solid fa-spinner fa-spin"></i> Enviando...
+        } @else {
+          <i class="fa-solid fa-circle-check"></i> Confirmar asistencia
+        }
+      </button>
+    </div>
+  }
+
+  <!-- ── PASO 3: Enviado con éxito ── -->
+  @if (paso === 'enviado' && invitadoEncontrado) {
+    <div class="rsvp__success">
+      @if (asistencia === 'si') {
+        <span class="rsvp__success-icon">🎉</span>
+        <h3>¡Gracias, {{ invitadoEncontrado.nombre }}!</h3>
+        <p>
+          ¡Nos vemos en la fiesta!<br>
+          Recuerda que tienes lugar para
+          <strong>{{ invitadoEncontrado.invitados }}</strong>
+          {{ invitadoEncontrado.invitados === 1 ? 'persona' : 'personas' }}.
+        </p>
+      } @else {
+        <span class="rsvp__success-icon">🌸</span>
+        <h3>¡Gracias, {{ invitadoEncontrado.nombre }}!</h3>
+        <p>Gracias por avisarnos. ¡Te echaremos de menos!</p>
+      }
+      <button class="rsvp__btn rsvp__btn--outline" (click)="reintentar()">
+        <i class="fa-solid fa-rotate-left"></i> Volver
+      </button>
+    </div>
+  }
+</section>

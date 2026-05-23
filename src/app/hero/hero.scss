@@ -1,0 +1,378 @@
+// ── BANNER ───────────────────────────────────────────────
+.banner { background: #fde8f0; }
+
+// Arco: imagen completa, texto encima en la parte superior del arco
+.banner__arch {
+  position: relative;
+  line-height: 0;
+}
+
+.banner__arch-img {
+  width: 100%;
+  display: block;
+  // portada.jpg: tiara arriba, rosas abajo, texto en el espacio central
+}
+
+.banner__title {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.banner__name1 {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1.4rem, 6vw, 2.2rem);
+  color: #c05070;
+  line-height: 1.2;
+  margin-top: 0.4rem;
+  text-shadow: 0 1px 6px rgba(255, 255, 255, 0.7);
+}
+
+.banner__name2 {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1.1rem, 4.5vw, 1.75rem);
+  color: #d97095;
+  line-height: 1.2;
+  text-shadow: 0 1px 6px rgba(255, 255, 255, 0.7);
+}
+
+.banner__mis,
+.banner__anos {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 0.65em;
+  text-transform: uppercase;
+  color: #c05070;
+}
+
+.banner__xv {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(4rem, 16vw, 7rem);
+  color: #c05070;
+  line-height: 0.85;
+  display: block;
+  text-shadow: 0 2px 14px rgba(192, 80, 112, 0.22);
+}
+
+// Princesa: en su propia franja con fondo que coincide con el arco
+.banner__princess-wrap {
+  background: linear-gradient(180deg, #fde8f0 0%, #fce0ec 100%);
+  text-align: center;
+  padding: 0.5rem 0 0;
+  line-height: 0;
+}
+
+.banner__princess {
+  width: 72%;
+  max-width: 260px;
+  display: block;
+  margin: 0 auto;
+  // mix-blend-mode blends el fondo blanco de la imagen con el rosa
+  mix-blend-mode: multiply;
+}
+
+// ── PLAYER ───────────────────────────────────────────────
+.player {
+  background: #fce0ec;
+  text-align: center;
+  padding: 1rem 1.5rem 1.75rem;
+
+  &__hint {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #b06080;
+    margin-bottom: 0.8rem;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  &__skip {
+    background: none;
+    border: none;
+    color: #c05070;
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    &:hover { opacity: 1; }
+  }
+
+  &__play {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #e04848;
+    border: none;
+    color: #fff;
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 18px rgba(224, 72, 72, 0.42);
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    animation: pulse-red 2s ease infinite;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 22px rgba(224, 72, 72, 0.55);
+      animation: none;
+    }
+    &:active { transform: scale(0.93); }
+  }
+}
+
+// ── POEMA ────────────────────────────────────────────────
+.poema {
+  background: #fff8fa;
+  text-align: center;
+
+  &__img-top {
+    width: 100%;
+    overflow: hidden;
+    max-height: 200px;
+    img {
+      width: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+    }
+  }
+
+  &__body { padding: 1.75rem 2.5rem 2.5rem; }
+
+  &__text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: #5c2535;
+  }
+}
+
+// ── PADRES ───────────────────────────────────────────────
+.padres {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  line-height: 0;
+
+  &__bg { width: 100%; display: block; }
+
+  &__content {
+    position: absolute;
+    top: 16%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    padding: 0 2rem;
+    line-height: 1.4;
+  }
+
+  &__titulo {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    color: #c05070;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+  }
+
+  &__nombre {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+    font-weight: 600;
+    color: #5c2535;
+    line-height: 1.6;
+  }
+
+  &__y {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    color: #d97095;
+    line-height: 1.4;
+  }
+
+  &__honor {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.88rem, 3vw, 1rem);
+    color: #7a3a50;
+    margin-top: 0.8rem;
+    line-height: 1.7;
+    font-style: italic;
+  }
+}
+
+// ── NOMBRE QUINCEAÑERA ───────────────────────────────────
+.quincename {
+  background: #fff8fa;
+  padding: 1.5rem 1rem 1rem;
+  text-align: center;
+
+  &__wrap {
+    position: relative;
+    display: inline-block;
+    width: min(320px, 88vw);
+  }
+
+  &__circle {
+    width: 100%;
+    display: block;
+    animation: float-up 4s ease-in-out infinite;
+  }
+
+  &__text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54%;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  &__line1 {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(1.2rem, 5.5vw, 1.75rem);
+    color: #c05070;
+    display: block;
+  }
+
+  &__line2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(1rem, 4.5vw, 1.45rem);
+    color: #d97095;
+    display: block;
+  }
+}
+
+// ── FECHA ────────────────────────────────────────────────
+.fecha {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  line-height: 0;
+  min-height: 220px;
+  background: #fde8f0;
+
+  &__bg { width: 100%; display: block; opacity: 0.55; }
+
+  &__body {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    line-height: 1;
+  }
+
+  &__card {
+    background: rgba(255,255,255,0.88);
+    border: 1.5px solid #e8a0b8;
+    border-radius: 16px;
+    padding: 0.85rem 2rem;
+    box-shadow: 0 2px 12px rgba(192,80,112,0.1);
+  }
+
+  &__mes {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.5em;
+    color: #d97095;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+
+  &__label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    color: #5c2535;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  &__num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #c05070;
+    line-height: 1;
+  }
+}
+
+// ── CUENTA REGRESIVA ─────────────────────────────────────
+.cdr__hint {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  color: #7a3a50;
+  font-style: italic;
+  line-height: 1;
+}
+
+.cdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.1rem;
+
+  &__bloque {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 54px;
+    background: rgba(255,255,255,0.88);
+    border-radius: 10px;
+    padding: 0.4rem 0.3rem 0.3rem;
+  }
+
+  &__num {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+    font-weight: 700;
+    color: #c05070;
+    line-height: 1;
+    animation: shimmer-pink 2.5s ease-in-out infinite;
+  }
+
+  &__sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #7a3a50;
+    margin-top: 0.15rem;
+  }
+
+  &__sep {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 7vw, 2.2rem);
+    color: #d97095;
+    opacity: 0.8;
+    padding-top: 0.2rem;
+    align-self: flex-start;
+  }
+}

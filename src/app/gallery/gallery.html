@@ -1,0 +1,24 @@
+<section class="galeria" id="galeria">
+  <h2 class="galeria__titulo" data-aos="fade-down">Momentos especiales</h2>
+  <div class="galeria__grid">
+    @for (photo of photos; track photo.src; let i = $index) {
+      <div class="galeria__item"
+           (click)="open(i)"
+           data-aos="zoom-in"
+           [attr.data-aos-delay]="i * 120">
+        <img [src]="photo.src" [alt]="photo.alt" loading="lazy" />
+        <div class="galeria__overlay">🔍</div>
+      </div>
+    }
+  </div>
+
+  @if (lightboxOpen) {
+    <div class="lightbox" (click)="close()">
+      <button class="lightbox__close" (click)="close()">✕</button>
+      <button class="lightbox__prev" (click)="$event.stopPropagation(); prev()">‹</button>
+      <img [src]="photos[activeIndex].full" [alt]="photos[activeIndex].alt"
+           (click)="$event.stopPropagation()" />
+      <button class="lightbox__next" (click)="$event.stopPropagation(); next()">›</button>
+    </div>
+  }
+</section>

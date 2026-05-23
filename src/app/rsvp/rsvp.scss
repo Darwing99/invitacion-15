@@ -1,0 +1,247 @@
+.rsvp {
+  background: #fff8fa;
+  padding: 3rem 2rem 3.5rem;
+  text-align: center;
+
+  &__header { margin-bottom: 2rem; }
+
+  &__title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.2rem;
+    color: #c05070;
+    margin-bottom: 0.6rem;
+  }
+
+  &__sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #7a3a50;
+    line-height: 1.7;
+  }
+
+  &__form {
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      color: #5c2535;
+      letter-spacing: 0.04em;
+
+      i { margin-right: 0.35rem; color: #c05070; }
+    }
+
+    input[type='text'],
+    input[type='number'] {
+      background: #fff;
+      border: 1.5px solid #e8a0b8;
+      border-radius: 10px;
+      color: #5c2535;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      padding: 0.65rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+
+      &::placeholder { color: #c9a0b0; }
+      &:focus { border-color: #c05070; }
+    }
+  }
+
+  // ── Campo teléfono: prefijo + número como una sola cápsula ─────────────
+  &__tel-row {
+    display: flex;
+    align-items: stretch;
+    border: 1.5px solid #e8a0b8;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    transition: border-color 0.2s;
+
+    &:focus-within { border-color: #c05070; }
+  }
+
+  &__prefix {
+    flex: 0 0 auto;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fff5f8;
+    border: none;
+    border-right: 1.5px solid #e8a0b8;
+    color: #5c2535;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.65rem 0.5rem 0.65rem 0.75rem;
+    outline: none;
+    cursor: pointer;
+    min-width: 80px;
+  }
+
+  &__tel-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #5c2535;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    padding: 0.65rem 1rem;
+    outline: none;
+    min-width: 0;
+
+    &::placeholder { color: #c9a0b0; }
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
+  &__error {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: #c03050;
+    background: rgba(192, 48, 80, 0.07);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    text-align: center;
+
+    i { margin-right: 0.35rem; }
+  }
+
+  &__found {
+    background: linear-gradient(135deg, #fff0f5 0%, #ffe8f0 100%);
+    border: 1.5px solid #e8a0b8;
+    border-radius: 14px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  &__found-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  &__found-name {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.6rem;
+    color: #c05070;
+    margin-bottom: 0.35rem;
+  }
+
+  &__found-info {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: #5c2535;
+
+    strong {
+      font-size: 1.25rem;
+      color: #c05070;
+    }
+  }
+
+  &__radio-group {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__radio {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    border: 1.5px solid #e8a0b8;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #5c2535;
+    transition: all 0.2s;
+
+    input[type='radio'] { display: none; }
+    i { font-size: 0.9rem; }
+
+    &.active,
+    &:hover {
+      border-color: #c05070;
+      background: rgba(192, 80, 112, 0.08);
+    }
+  }
+
+  &__btn {
+    align-self: center;
+    padding: 0.75rem 2.5rem;
+    background: #c05070;
+    color: #fff;
+    border: 1.5px solid #c05070;
+    border-radius: 50px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 14px rgba(192, 80, 112, 0.25);
+    animation: pulse-pink 2.2s ease infinite;
+
+    i { margin-right: 0.4rem; }
+
+    &:hover:not(:disabled) {
+      background: #a03e5c;
+      transform: translateY(-2px);
+      animation: none;
+    }
+    &:active:not(:disabled) { transform: scale(0.95); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
+
+    &--outline {
+      background: transparent;
+      color: #c05070;
+      margin-top: 1rem;
+      &:hover { background: #c05070; color: #fff; }
+    }
+  }
+
+  &__success {
+    max-width: 380px;
+    margin: 0 auto;
+    animation: fadeUp 0.5s ease both;
+    text-align: center;
+
+    &-icon { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+
+    h3 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2rem;
+      color: #c05070;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: #5c2535;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+
+      strong { color: #c05070; }
+    }
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

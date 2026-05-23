@@ -1,0 +1,74 @@
+@import 'aos/dist/aos.css';
+
+// ── ANIMACIONES GLOBALES ──────────────────────────────────
+
+@keyframes pulse-pink {
+  0%   { box-shadow: 0 4px 14px rgba(192,80,112,0.35), 0 0 0 0 rgba(192,80,112,0.45); }
+  70%  { box-shadow: 0 4px 14px rgba(192,80,112,0.35), 0 0 0 14px rgba(192,80,112,0); }
+  100% { box-shadow: 0 4px 14px rgba(192,80,112,0.35), 0 0 0 0   rgba(192,80,112,0); }
+}
+
+@keyframes pulse-red {
+  0%   { box-shadow: 0 4px 18px rgba(224,72,72,0.42), 0 0 0 0  rgba(224,72,72,0.5); }
+  70%  { box-shadow: 0 4px 18px rgba(224,72,72,0.42), 0 0 0 16px rgba(224,72,72,0); }
+  100% { box-shadow: 0 4px 18px rgba(224,72,72,0.42), 0 0 0 0   rgba(224,72,72,0); }
+}
+
+@keyframes float-up {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes shimmer-pink {
+  0%, 100% { text-shadow: 0 0 0 rgba(192,80,112,0); }
+  50%       { text-shadow: 0 0 14px rgba(192,80,112,0.4); }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Cormorant Garamond', serif;
+  background: #fff8fa;
+  color: #5c2535;
+  -webkit-font-smoothing: antialiased;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.section-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #d97095;
+  margin-bottom: 0.4rem;
+}
+
+.section-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(2rem, 6vw, 2.6rem);
+  color: #c05070;
+}
+
+.section-divider {
+  width: 50px;
+  height: 1.5px;
+  background: linear-gradient(90deg, #e8a0b8, #d97095);
+  margin: 0.75rem auto;
+  border-radius: 2px;
+}

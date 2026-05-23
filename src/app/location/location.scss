@@ -1,0 +1,57 @@
+.recepcion {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+
+  &__bg {
+    width: 100%;
+    display: block;
+    opacity: 0.85;
+  }
+
+  &__content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    padding: 1rem 2rem;
+  }
+
+  &__icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  &__title {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(2rem, 8vw, 3rem);
+    color: #c05070;
+    margin-bottom: 1.25rem;
+    text-shadow: 0 1px 6px rgba(255,255,255,0.7);
+  }
+
+  &__btn {
+    display: inline-block;
+    padding: 0.65rem 2.2rem;
+    background: #c05070;
+    color: #fff;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-decoration: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 14px rgba(192, 80, 112, 0.35);
+    animation: pulse-pink 2.2s ease infinite;
+    transition: background 0.3s, transform 0.2s;
+
+    &:hover {
+      background: #a03e5c;
+      transform: translateY(-2px);
+      animation: none;
+    }
+    &:active { transform: scale(0.95); }
+  }
+}

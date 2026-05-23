@@ -1,0 +1,135 @@
+.galeria {
+  background: linear-gradient(180deg, #fff8fa 0%, #fde8f0 100%);
+  padding: 2.5rem 1.25rem 3rem;
+  text-align: center;
+
+  &__cargando {
+    font-size: 2rem;
+    color: #c05070;
+    padding: 2rem 0;
+  }
+
+  &__titulo {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    color: #c05070;
+    margin-bottom: 1.5rem;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  &__item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    cursor: pointer;
+    aspect-ratio: 3/4;
+    box-shadow: 0 2px 10px rgba(192, 80, 112, 0.15);
+
+    &:first-child {
+      grid-column: span 2;
+      aspect-ratio: 4/3;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    &:hover img { transform: scale(1.06); }
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(192, 80, 112, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: all 0.3s;
+
+    .galeria__item:hover & {
+      background: rgba(192, 80, 112, 0.25);
+      opacity: 1;
+    }
+  }
+}
+
+// ── LIGHTBOX ─────────────────────────────────────────────
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+
+  img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 12px;
+    object-fit: contain;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  &__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 1.4rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    &:hover { background: rgba(255,255,255,0.3); }
+  }
+
+  &__prev,
+  &__next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    &:hover { background: rgba(255,255,255,0.3); }
+  }
+
+  &__prev { left: 0.75rem; }
+  &__next { right: 0.75rem; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
