@@ -22,8 +22,6 @@ export interface Invitado {
   invitados: number;
 }
 
-const STORAGE_KEY = 'rsvp_confirmados';
-
 export const PREFIJOS = [
   { code: '+34',  flag: '🇪🇸', nombre: 'España' },
   { code: '+504', flag: '🇭🇳', nombre: 'Honduras' },
@@ -68,19 +66,8 @@ export class Rsvp {
     this.buscando = true;
     this.errorMsg = '';
 
-    // 1. comprobar si ya confirmó antes (localStorage)
-    const previa = this.leerConfirmacion(tel) ?? this.leerConfirmacion(this.prefijo + tel);
-    if (previa) {
-      this.confirmacionPrevia = previa;
-      this.invitadoEncontrado = { telefono: previa.telefono, nombre: previa.nombre, invitados: previa.invitados };
-      this.asistencia = previa.asistencia;
-      this.paso = 'ya-confirmado';
-      this.buscando = false;
-      return;
-    }
-
     try {
-      // 2. comprobar hoja de respuestas del formulario
+      // 1. comprobar hoja de respuestas del formulario (Google Sheets)
       let respuesta: Confirmacion | null = null;
       try {
         respuesta = await this.fetchRespuesta(this.prefijo + tel)
@@ -89,7 +76,6 @@ export class Rsvp {
         console.warn('[RSVP] No se pudo consultar hoja de respuestas:', e);
       }
       if (respuesta) {
-        this.guardarConfirmacion(respuesta);
         this.confirmacionPrevia = respuesta;
         this.invitadoEncontrado = { telefono: respuesta.telefono, nombre: respuesta.nombre, invitados: respuesta.invitados };
         this.asistencia = respuesta.asistencia;
@@ -97,7 +83,7 @@ export class Rsvp {
         return;
       }
 
-      // 3. buscar con prefijo; si no, sin prefijo (por si la hoja no tiene prefijo)
+      // 2. buscar con prefijo; si no, sin prefijo (por si la hoja no tiene prefijo)
       const invitado = await this.fetchInvitado(this.prefijo + tel)
                     ?? await this.fetchInvitado(tel);
       if (invitado) {
@@ -112,23 +98,6 @@ export class Rsvp {
     } finally {
       this.buscando = false;
     }
-  }
-
-  private leerConfirmacion(tel: string): Confirmacion | null {
-    try {
-      const digitos = (s: string) => s.replace(/\D/g, '');
-      const mapa: Record<string, Confirmacion> = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
-      return mapa[digitos(tel)] ?? null;
-    } catch { return null; }
-  }
-
-  private guardarConfirmacion(conf: Confirmacion) {
-    try {
-      const digitos = (s: string) => s.replace(/\D/g, '');
-      const mapa: Record<string, Confirmacion> = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
-      mapa[digitos(conf.telefono)] = conf;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(mapa));
-    } catch { /* localStorage no disponible */ }
   }
 
   private async fetchRespuesta(tel: string): Promise<Confirmacion | null> {
@@ -199,12 +168,6 @@ export class Rsvp {
     fetch(FORM_ACTION, { method: 'POST', mode: 'no-cors', body }).catch(() => {});
 
     setTimeout(() => {
-      this.guardarConfirmacion({
-        telefono:   this.invitadoEncontrado!.telefono,
-        nombre:     this.invitadoEncontrado!.nombre,
-        asistencia: this.asistencia as 'si' | 'no',
-        invitados:  this.invitadoEncontrado!.invitados,
-      });
       this.enviando = false;
       this.paso = 'enviado';
     }, 800);

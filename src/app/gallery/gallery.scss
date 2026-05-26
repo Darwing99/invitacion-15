@@ -2,6 +2,9 @@
   background: linear-gradient(180deg, #fff8fa 0%, #fde8f0 100%);
   padding: 2.5rem 1.25rem 3rem;
   text-align: center;
+  position: relative;
+
+  &--deco { overflow: hidden; }
 
   &__cargando {
     font-size: 2rem;

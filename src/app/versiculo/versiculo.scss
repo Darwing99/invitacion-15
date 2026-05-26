@@ -1,0 +1,103 @@
+.versiculo {
+  background: #fff8fa;
+  text-align: center;
+  position: relative;
+
+  &--deco {
+    overflow: hidden;
+  }
+
+  &__deco {
+    width: 100%;
+    overflow: hidden;
+    max-height: 180px;
+
+    img {
+      width: 100%;
+      object-fit: cover;
+      object-position: bottom;
+      display: block;
+      transform: scaleY(-1);
+    }
+  }
+
+  &__body {
+    padding: 1.25rem 2rem 2.5rem;
+  }
+
+  &__label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #d97095;
+    margin-bottom: 1rem;
+  }
+
+  &__slide {
+    min-height: 7.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+
+    &--visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &__text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.95rem, 4vw, 1.08rem);
+    line-height: 1.85;
+    color: #5c2535;
+    font-style: italic;
+    margin-bottom: 0.75rem;
+    max-width: 22rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  &__cita {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #c05070;
+    letter-spacing: 0.05em;
+  }
+
+  &__dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-top: 1.25rem;
+  }
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    background: #e8c0d0;
+    transition:
+      background 0.25s ease,
+      transform 0.25s ease;
+
+    &--active {
+      background: #c05070;
+      transform: scale(1.25);
+    }
+
+    &:hover:not(&--active) {
+      background: #d97095;
+    }
+  }
+}

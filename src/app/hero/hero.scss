@@ -1,5 +1,10 @@
 // ── BANNER ───────────────────────────────────────────────
-.banner { background: #fde8f0; }
+.banner {
+  background: #fde8f0;
+  position: relative;
+
+  &--deco { overflow: hidden; }
+}
 
 // Arco: imagen completa, texto encima en la parte superior del arco
 .banner__arch {
@@ -140,6 +145,9 @@
 .poema {
   background: #fff8fa;
   text-align: center;
+  position: relative;
+
+  &--deco { overflow: hidden; }
 
   &__img-top {
     width: 100%;
@@ -220,6 +228,9 @@
   background: #fff8fa;
   padding: 1.5rem 1rem 1rem;
   text-align: center;
+  position: relative;
+
+  &--deco { overflow: hidden; }
 
   &__wrap {
     position: relative;

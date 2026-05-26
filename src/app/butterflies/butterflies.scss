@@ -1,0 +1,100 @@
+.butterflies {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+  perspective: 720px;
+
+  &--fixed {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 50;
+  }
+}
+
+.butterfly {
+  position: absolute;
+  transform-origin: center center;
+  will-change: transform, opacity;
+
+  &__svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(192, 80, 112, 0.2));
+  }
+
+  &__wing--l {
+    transform-origin: 40px 28px;
+    animation: flap-left 0.5s ease-in-out infinite alternate;
+  }
+
+  &__wing--r {
+    transform-origin: 40px 28px;
+    animation: flap-right 0.5s ease-in-out infinite alternate;
+  }
+
+  &__body {
+    fill: #7a3a50;
+  }
+
+  &__antenna {
+    stroke: #9a5a6a;
+    stroke-width: 1;
+    fill: none;
+  }
+
+  // Tonos rosa suaves de la invitación (sin filtros artificiales)
+  &--classic .butterfly__wing {
+    fill: #f0b8d0;
+    stroke: #d97095;
+    stroke-width: 0.6;
+  }
+
+  &--delicate .butterfly__wing {
+    fill: #fce0ec;
+    stroke: #e8a0b8;
+    stroke-width: 0.5;
+  }
+
+  &--elegant .butterfly__wing {
+    fill: #e890b0;
+    stroke: #c05070;
+    stroke-width: 0.7;
+  }
+
+  &--delicate .butterfly__wing--l,
+  &--delicate .butterfly__wing--r {
+    animation-duration: 0.42s;
+  }
+
+  &--elegant .butterfly__wing--l,
+  &--elegant .butterfly__wing--r {
+    animation-duration: 0.55s;
+  }
+}
+
+@keyframes flap-left {
+  from {
+    transform: scaleX(1) rotate(0deg);
+  }
+  to {
+    transform: scaleX(0.78) rotate(-6deg);
+  }
+}
+
+@keyframes flap-right {
+  from {
+    transform: scaleX(1) rotate(0deg);
+  }
+  to {
+    transform: scaleX(0.78) rotate(6deg);
+  }
+}

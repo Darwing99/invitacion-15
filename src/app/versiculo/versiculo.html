@@ -1,0 +1,23 @@
+<section class="versiculo versiculo--deco" data-aos="fade-up">
+  <app-butterflies [count]="2" />
+  <div class="versiculo__deco">
+    <img src="src/Flower%20invitation.jpg" alt="" aria-hidden="true" />
+  </div>
+
+  <div class="versiculo__body">
+    <p class="versiculo__label">Palabra de bendición</p>
+
+    <div class="versiculo__slide" [class.versiculo__slide--visible]="visible" role="region" aria-live="polite"
+      [attr.aria-label]="'Versículo: ' + actual.referencia">
+      <p class="versiculo__text">"{{ actual.texto }}"</p>
+      <p class="versiculo__cita">{{ actual.referencia }}</p>
+    </div>
+
+    <div class="versiculo__dots" role="tablist" aria-label="Versículos">
+      @for (v of versiculos; track v.referencia; let i = $index) {
+      <button type="button" class="versiculo__dot" [class.versiculo__dot--active]="i === indice" (click)="irA(i)"
+        [attr.aria-label]="'Ver ' + v.referencia" [attr.aria-selected]="i === indice" role="tab"></button>
+      }
+    </div>
+  </div>
+</section>

@@ -1,6 +1,7 @@
 import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GALLERY_FILES } from './gallery-manifest';
+import { Butterflies, ButterflySpec } from '../butterflies/butterflies';
 
 interface Photo { src: string; full: string; alt: string; }
 
@@ -10,7 +11,7 @@ const PHOTOS: Photo[] = GALLERY_FILES.map((f: string) => ({
 
 @Component({
   selector: 'app-gallery',
-  imports: [CommonModule],
+  imports: [CommonModule, Butterflies],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss',
 })
@@ -18,6 +19,10 @@ export class Gallery {
   private cdr = inject(ChangeDetectorRef);
 
   photos = PHOTOS;
+
+  galeriaButterflies: ButterflySpec[] = [
+    { size: 24, top: '10%', left: '25%', delay: 3, aos: 'fade-down', aosDelay: 0, style: 'classic' },
+  ];
 
   activeIndex = 0;
   lightboxOpen = false;
