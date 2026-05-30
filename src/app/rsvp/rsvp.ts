@@ -22,6 +22,13 @@ export interface Invitado {
   invitados: number;
 }
 
+interface GuestRow {
+  telefono: string;
+  nombre: string;
+  invitados: number;
+  numerosExtras: string[];
+}
+
 export const PREFIJOS = [
   { code: '+34',  flag: '🇪🇸', nombre: 'España' },
   { code: '+504', flag: '🇭🇳', nombre: 'Honduras' },
@@ -67,31 +74,53 @@ export class Rsvp {
     this.errorMsg = '';
 
     try {
-      // 1. comprobar hoja de respuestas del formulario (Google Sheets)
-      let respuesta: Confirmacion | null = null;
-      try {
-        respuesta = await this.fetchRespuesta(this.prefijo + tel)
-                 ?? await this.fetchRespuesta(tel);
-      } catch (e) {
-        console.warn('[RSVP] No se pudo consultar hoja de respuestas:', e);
+      const [guestCsv, respCsv] = await Promise.all([
+        this.fetchCsv(GUEST_SHEET_CSV),
+        this.fetchCsv(RESPONSES_SHEET_CSV).catch(() => ''),
+      ]);
+
+      const allRows = this.parseGuestCsv(guestCsv);
+      const digitos = (s: string) => s.replace(/\D/g, '');
+      const phonesToTry = [digitos(this.prefijo + tel), digitos(tel)];
+
+      const matches: Array<{ row: GuestRow; via: 'telefono' | 'extras' }> = [];
+      for (const row of allRows) {
+        const rowTel = digitos(row.telefono);
+        if (phonesToTry.includes(rowTel)) {
+          matches.push({ row, via: 'telefono' });
+          continue;
+        }
+        for (const extra of row.numerosExtras) {
+          if (phonesToTry.includes(digitos(extra))) {
+            matches.push({ row, via: 'extras' });
+            break;
+          }
+        }
       }
-      if (respuesta) {
-        this.confirmacionPrevia = respuesta;
-        this.invitadoEncontrado = { telefono: respuesta.telefono, nombre: respuesta.nombre, invitados: respuesta.invitados };
-        this.asistencia = respuesta.asistencia;
-        this.paso = 'ya-confirmado';
+
+      if (matches.length === 0) {
+        this.paso = 'no-encontrado';
         return;
       }
 
-      // 2. buscar con prefijo; si no, sin prefijo (por si la hoja no tiene prefijo)
-      const invitado = await this.fetchInvitado(this.prefijo + tel)
-                    ?? await this.fetchInvitado(tel);
-      if (invitado) {
-        this.invitadoEncontrado = invitado;
-        this.paso = 'confirmar';
-      } else {
-        this.paso = 'no-encontrado';
+      const respuestas = respCsv ? this.parseRespuestasCsvAll(respCsv) : [];
+      const confirmedPhones = new Set(respuestas.map(r => digitos(r.telefono)));
+      const available = matches.filter(m => !confirmedPhones.has(digitos(m.row.telefono)));
+
+      if (available.length === 0) {
+        const resp = respuestas.find(r => digitos(r.telefono) === digitos(matches[0].row.telefono));
+        if (resp) {
+          this.confirmacionPrevia = resp;
+          this.invitadoEncontrado = { telefono: resp.telefono, nombre: resp.nombre, invitados: resp.invitados };
+          this.asistencia = resp.asistencia;
+          this.paso = 'ya-confirmado';
+        }
+        return;
       }
+
+      const chosen = available.find(m => m.via === 'telefono') ?? available[0];
+      this.invitadoEncontrado = { telefono: chosen.row.telefono, nombre: chosen.row.nombre, invitados: chosen.row.invitados };
+      this.paso = 'confirmar';
     } catch (e) {
       console.error('[RSVP] Error al buscar invitado:', e);
       this.errorMsg = 'Error de conexión. Intenta de nuevo.';
@@ -100,59 +129,48 @@ export class Rsvp {
     }
   }
 
-  private async fetchRespuesta(tel: string): Promise<Confirmacion | null> {
-    const res = await fetch(RESPONSES_SHEET_CSV);
-    const text = await res.text();
-    return this.parseRespuestasCsv(text, tel);
+  private async fetchCsv(url: string): Promise<string> {
+    const res = await fetch(url);
+    return await res.text();
   }
 
-  private parseRespuestasCsv(csv: string, tel: string): Confirmacion | null {
-    const digitos = (s: string) => s.replace(/\D/g, '');
-    const telNorm = digitos(tel);
+  private parseGuestCsv(csv: string): GuestRow[] {
     const lines = csv.trim().split(/\r?\n/).slice(1);
+    const rows: GuestRow[] = [];
     for (const line of lines) {
       if (!line.trim()) continue;
       const cols = line.match(/(".*?"|[^,]+)/g)
         ?.map(c => c.trim().replace(/^"|"$/g, '').trim()) ?? [];
-      // columns: Marca temporal, Nombre, Teléfonos, Invitados, Asistirá
+      const [telCol, nombre, inv, ...rest] = cols;
+      const extras = rest.flatMap(s => s.split(',')).map(s => s.trim()).filter(Boolean);
+      rows.push({
+        telefono: telCol ?? '',
+        nombre: nombre ?? '',
+        invitados: parseInt(inv ?? '1', 10) || 1,
+        numerosExtras: extras,
+      });
+    }
+    return rows;
+  }
+
+  private parseRespuestasCsvAll(csv: string): Confirmacion[] {
+    const lines = csv.trim().split(/\r?\n/).slice(1);
+    const respuestas: Confirmacion[] = [];
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const cols = line.match(/(".*?"|[^,]+)/g)
+        ?.map(c => c.trim().replace(/^"|"$/g, '').trim()) ?? [];
       const [, nombre, telCol, inv, asistira] = cols;
-      if (telCol && digitos(telCol) === telNorm) {
-        return {
+      if (telCol) {
+        respuestas.push({
           telefono: telCol,
           nombre: nombre ?? '',
           asistencia: asistira?.toLowerCase().startsWith('s') ? 'si' : 'no',
           invitados: parseInt(inv ?? '1', 10) || 1,
-        };
+        });
       }
     }
-    return null;
-  }
-
-  private async fetchInvitado(tel: string): Promise<Invitado | null> {
-    const res = await fetch(GUEST_SHEET_CSV);
-    const text = await res.text();
-    return this.parseCsv(text, tel);
-  }
-
-  private parseCsv(csv: string, tel: string): Invitado | null {
-    // strip everything except digits for robust comparison
-    const digitos = (s: string) => s.replace(/\D/g, '');
-    const telNorm = digitos(tel);
-
-    // handle both \r\n (Windows) and \n line endings
-    const lines = csv.trim().split(/\r?\n/).slice(1);
-
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      // handle quoted fields (e.g. "Hernandez, Jr.")
-      const cols = line.match(/(".*?"|[^,]+)/g)
-        ?.map(c => c.trim().replace(/^"|"$/g, '').trim()) ?? [];
-      const [telCol, nombre, inv] = cols;
-      if (telCol && digitos(telCol) === telNorm) {
-        return { telefono: telCol, nombre: nombre ?? '', invitados: parseInt(inv ?? '1', 10) || 1 };
-      }
-    }
-    return null;
+    return respuestas;
   }
 
   confirmar() {

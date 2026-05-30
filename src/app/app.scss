@@ -22,7 +22,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem 2.5rem;
+    padding: 4rem 2.5rem;
   }
 
   &__title {
@@ -42,7 +42,7 @@
     letter-spacing: 0.15em;
     color: #c05070;
     margin-bottom: 1.1rem;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255, 255, 255, 0.6);
   }
 
   &__list {
@@ -64,7 +64,9 @@
     }
   }
 
-  &__icon { font-size: 1.2rem; }
+  &__icon {
+    font-size: 1.2rem;
+  }
 
   &__nota {
     font-family: 'Cormorant Garamond', serif;
@@ -73,7 +75,12 @@
     font-style: italic;
     line-height: 1.5;
 
-    &--pink { color: #c05070; font-weight: 600; font-style: normal; margin-top: 0.3rem; }
+    &--pink {
+      color: #c05070;
+      font-weight: 600;
+      font-style: normal;
+      margin-top: 0.3rem;
+    }
   }
 }
 
@@ -126,7 +133,9 @@
   font-size: 0.95rem;
   line-height: 1.8;
 
-  strong { color: #c05070; }
+  strong {
+    color: #c05070;
+  }
 
   &__email {
     font-size: 0.82rem;

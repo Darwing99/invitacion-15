@@ -3,31 +3,55 @@
 // ── ANIMACIONES GLOBALES ──────────────────────────────────
 
 @keyframes pulse-pink {
-  0%   { box-shadow: 0 4px 14px rgba(192,80,112,0.35), 0 0 0 0 rgba(192,80,112,0.45); }
-  70%  { box-shadow: 0 4px 14px rgba(192,80,112,0.35), 0 0 0 14px rgba(192,80,112,0); }
-  100% { box-shadow: 0 4px 14px rgba(192,80,112,0.35), 0 0 0 0   rgba(192,80,112,0); }
+  0% {
+    box-shadow: 0 4px 14px rgba(192, 80, 112, 0.35), 0 0 0 0 rgba(192, 80, 112, 0.45);
+  }
+
+  70% {
+    box-shadow: 0 4px 14px rgba(192, 80, 112, 0.35), 0 0 0 14px rgba(192, 80, 112, 0);
+  }
+
+  100% {
+    box-shadow: 0 4px 14px rgba(192, 80, 112, 0.35), 0 0 0 0 rgba(192, 80, 112, 0);
+  }
 }
 
 @keyframes pulse-red {
-  0%   { box-shadow: 0 4px 18px rgba(224,72,72,0.42), 0 0 0 0  rgba(224,72,72,0.5); }
-  70%  { box-shadow: 0 4px 18px rgba(224,72,72,0.42), 0 0 0 16px rgba(224,72,72,0); }
-  100% { box-shadow: 0 4px 18px rgba(224,72,72,0.42), 0 0 0 0   rgba(224,72,72,0); }
+  0% {
+    box-shadow: 0 4px 18px rgba(224, 72, 72, 0.42), 0 0 0 0 rgba(224, 72, 72, 0.5);
+  }
+
+  70% {
+    box-shadow: 0 4px 18px rgba(224, 72, 72, 0.42), 0 0 0 16px rgba(224, 72, 72, 0);
+  }
+
+  100% {
+    box-shadow: 0 4px 18px rgba(224, 72, 72, 0.42), 0 0 0 0 rgba(224, 72, 72, 0);
+  }
 }
 
 @keyframes float-up {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes shimmer-pink {
-  0%, 100% { text-shadow: 0 0 0 rgba(192,80,112,0); }
-  50%       { text-shadow: 0 0 14px rgba(192,80,112,0.4); }
-}
 
-@keyframes butterfly-drift {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33%       { transform: translate(6px, -10px) rotate(6deg); }
-  66%       { transform: translate(-8px, 6px) rotate(-5deg); }
+  0%,
+  100% {
+    text-shadow: 0 0 0 rgba(192, 80, 112, 0);
+  }
+
+  50% {
+    text-shadow: 0 0 14px rgba(192, 80, 112, 0.4);
+  }
 }
 
 *,

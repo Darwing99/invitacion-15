@@ -3,10 +3,6 @@
   text-align: center;
   position: relative;
 
-  &--deco {
-    overflow: hidden;
-  }
-
   &__deco {
     width: 100%;
     overflow: hidden;
@@ -34,24 +30,6 @@
     margin-bottom: 1rem;
   }
 
-  &__slide {
-    min-height: 7.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transform: translateY(8px);
-    transition:
-      opacity 0.5s ease,
-      transform 0.5s ease;
-
-    &--visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   &__text {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(0.95rem, 4vw, 1.08rem);
@@ -72,32 +50,4 @@
     letter-spacing: 0.05em;
   }
 
-  &__dots {
-    display: flex;
-    justify-content: center;
-    gap: 0.45rem;
-    margin-top: 1.25rem;
-  }
-
-  &__dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    background: #e8c0d0;
-    transition:
-      background 0.25s ease,
-      transform 0.25s ease;
-
-    &--active {
-      background: #c05070;
-      transform: scale(1.25);
-    }
-
-    &:hover:not(&--active) {
-      background: #d97095;
-    }
-  }
 }
