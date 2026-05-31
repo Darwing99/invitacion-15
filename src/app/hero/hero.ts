@@ -7,7 +7,7 @@ import { HeroFecha } from './fecha/fecha';
 
 @Component({
   selector: 'app-hero',
-  imports: [HeroBanner, Presentacion, HeroPoema, HeroAgradecimiento, HeroFecha],
+  imports: [HeroBanner, Presentacion, HeroPoema, HeroFecha],
   templateUrl: './hero.html',
 })
 export class Hero {

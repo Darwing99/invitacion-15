@@ -9,10 +9,11 @@ import { Vestimenta } from './vestimenta/vestimenta';
 import { Regalos } from './regalos/regalos';
 import { Footer } from './footer/footer';
 import AOS from 'aos';
+import { HeroAgradecimiento } from './hero/agradecimiento/agradecimiento';
 
 @Component({
   selector: 'app-root',
-  imports: [Hero, Gallery, Location, Vestimenta, Regalos, Rsvp, Butterflies, Versiculo, Footer],
+  imports: [Hero, Gallery, Location, Vestimenta, Regalos, Rsvp,HeroAgradecimiento, Butterflies, Versiculo, Footer],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
