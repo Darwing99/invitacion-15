@@ -1,0 +1,39 @@
+<section class="presentacion">
+  <div class="presentacion__particles">
+    @for (p of particulas; track p) {
+      <span class="presentacion__particle"></span>
+    }
+  </div>
+
+  <div class="presentacion__content">
+    <div class="presentacion__parents-label" data-aos="fade-down" data-aos-delay="0">
+      <h2 class="presentacion__title">Mis padres</h2>
+    </div>
+
+    <div class="presentacion__parents-names" data-aos="fade-up" data-aos-delay="200">
+      <p class="presentacion__parent-name">{{ madre }}</p>
+      <span class="presentacion__ampersand">&amp;</span>
+      <p class="presentacion__parent-name">{{ padre }}</p>
+    </div>
+
+    <div class="presentacion__invite" data-aos="fade-up" data-aos-delay="350">
+      <p>
+        Tienen el honor de invitarlos a festejar<br />
+        los <strong>XV años</strong> de:
+      </p>
+    </div>
+
+    <div class="presentacion__wreath" data-aos="zoom-in" data-aos-delay="500">
+      <img
+        src="src/butterfly_circle.png"
+        alt="Corona de mariposas y flores"
+        class="presentacion__wreath-img"
+        loading="eager"
+      />
+      <div class="presentacion__name">
+        <p class="presentacion__quince-name">{{ nombreLinea1 }}</p>
+        <p class="presentacion__quince-name">{{ nombreLinea2 }}</p>
+      </div>
+    </div>
+  </div>
+</section>

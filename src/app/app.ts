@@ -5,11 +5,14 @@ import { Location } from './location/location';
 import { Rsvp } from './rsvp/rsvp';
 import { Butterflies } from './butterflies/butterflies';
 import { Versiculo } from './versiculo/versiculo';
+import { Vestimenta } from './vestimenta/vestimenta';
+import { Regalos } from './regalos/regalos';
+import { Footer } from './footer/footer';
 import AOS from 'aos';
 
 @Component({
   selector: 'app-root',
-  imports: [Hero, Gallery, Location, Rsvp, Butterflies, Versiculo],
+  imports: [Hero, Gallery, Location, Vestimenta, Regalos, Rsvp, Butterflies, Versiculo, Footer],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

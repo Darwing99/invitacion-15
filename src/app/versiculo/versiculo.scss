@@ -22,18 +22,18 @@
   }
 
   &__label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.22em;
+    font-family: var(--font-serif);
+    font-size: var(--text-xs);
+    letter-spacing: var(--letter-spacing-label);
     text-transform: uppercase;
     color: #d97095;
     margin-bottom: 1rem;
   }
 
   &__text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(0.95rem, 4vw, 1.08rem);
-    line-height: 1.85;
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    line-height: var(--line-height-relaxed);
     color: #5c2535;
     font-style: italic;
     margin-bottom: 0.75rem;
@@ -43,8 +43,8 @@
   }
 
   &__cita {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
+    font-family: var(--font-display);
+    font-size: var(--text-md);
     font-weight: 700;
     color: #c05070;
     letter-spacing: 0.05em;

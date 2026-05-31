@@ -1,130 +1,15 @@
-<!-- ── BANNER ─────────────────────────────── -->
-<section class="banner banner--deco">
+<app-hero-banner
+  [nombreLinea1]="nombreLinea1"
+  [nombreLinea2]="nombreLinea2"
+></app-hero-banner>
 
-  <!-- Arco: solo texto MIS XV AÑOS encima -->
-  <div class="banner__arch">
-    <img class="banner__arch-img" src="src/portada.jpg" alt="" aria-hidden="true" />
-    <div class="banner__title">
-      <p class="banner__mis">MIS</p>
-      <p class="banner__xv">XV</p>
-      <p class="banner__anos">AÑOS</p>
-      <p class="banner__name1">{{ nombreLinea1 }}</p>
-      <p class="banner__name2">{{ nombreLinea2 }}</p>
-    </div>
-  </div>
+<app-presentacion
+  [madre]="madre"
+  [padre]="padre"
+  [nombreLinea1]="nombreLinea1"
+  [nombreLinea2]="nombreLinea2"
+></app-presentacion>
 
-  <!-- Princesa: franja rosa propia, sin fondo blanco visible -->
-  <div class="banner__princess-wrap">
-    <img class="banner__princess" src="src/princesa.jpg" alt="Quinceañera" />
-  </div>
+<app-hero-poema></app-hero-poema>
 
-  <!-- Reproductor -->
-  <div class="player">
-    <p class="player__hint">dale play, para escuchar la musica</p>
-    <div class="player__controls">
-      <button class="player__skip" aria-label="anterior">
-        <i class="fa-solid fa-backward-step"></i>
-      </button>
-      <button class="player__play" (click)="toggleMusic()"
-              [attr.aria-label]="playing ? 'Pausar' : 'Reproducir'">
-        @if (playing) {
-          <i class="fa-solid fa-pause"></i>
-        } @else {
-          <i class="fa-solid fa-play"></i>
-        }
-      </button>
-      <button class="player__skip" aria-label="siguiente">
-        <i class="fa-solid fa-forward-step"></i>
-      </button>
-    </div>
-  </div>
-
-</section>
-
-<!-- ── POEMA ──────────────────────────────── -->
-<section class="poema poema--deco" data-aos="fade-up">
-  <div class="poema__img-top">
-    <img src="src/Flower%20invitation.jpg" alt="" aria-hidden="true" />
-  </div>
-  <div class="poema__body">
-    <p class="poema__text">
-      Hace quince años nació una<br>
-      hermosa niña enviada por Dios,<br>
-      para criarla y formarla como el<br>
-      más grande tesoro.
-    </p>
-    <br>
-    <p class="poema__text">
-      Hay momentos en la vida que<br>
-      imaginamos, soñamos y<br>
-      esperamos.
-    </p>
-    <br>
-    <p class="poema__text">
-      Uno de esos momentos ha<br>
-      llegado
-    </p>
-  </div>
-</section>
-
-<!-- ── PADRES ────────────────────────────── -->
-<section class="padres" data-aos="fade-up">
-  <img class="padres__bg" src="src/descarga%20(1).jpg" alt="" aria-hidden="true" />
-  <div class="padres__content">
-    <p class="padres__titulo">Mis padres</p>
-    <p class="padres__nombre">{{ madre }}</p>
-    <p class="padres__y">&</p>
-    <p class="padres__nombre">{{ padre }}</p>
-    <p class="padres__honor">
-      Tienen el honor de invitarlos a festejar<br>los XV años de:
-    </p>
-  </div>
-</section>
-
-<!-- ── NOMBRE QUINCEAÑERA ────────────────── -->
-<section class="quincename" data-aos="zoom-in" data-aos-duration="1000">
-  <div class="quincename__wrap">
-    <div class="quincename__text">
-      <p class="quincename__line1">{{ nombreLinea1 }}</p>
-      <p class="quincename__line2">{{ nombreLinea2 }}</p>
-    </div>
-  </div>
-</section>
-
-<!-- ── FECHA + CUENTA REGRESIVA ─────────── -->
-<section class="fecha" data-aos="fade-up">
-  <img class="fecha__bg" src="src/descarga%20(5).jpg" alt="" aria-hidden="true" />
-  <div class="fecha__body">
-    <div class="fecha__card" data-aos="zoom-in" data-aos-delay="200">
-      <p class="fecha__mes">JUNIO</p>
-      <div class="fecha__row">
-        <span class="fecha__label">SÁBADO</span>
-        <span class="fecha__num">27</span>
-        <span class="fecha__label">6:00 P.M.</span>
-      </div>
-    </div>
-
-    <p class="cdr__hint" data-aos="fade-up" data-aos-delay="300">Tan solo faltan</p>
-    <div class="cdr" data-aos="fade-up" data-aos-delay="400">
-      <div class="cdr__bloque">
-        <span class="cdr__num">{{ timeLeft.dias | number:'2.0-0' }}</span>
-        <span class="cdr__sub">días</span>
-      </div>
-      <span class="cdr__sep">:</span>
-      <div class="cdr__bloque">
-        <span class="cdr__num">{{ timeLeft.horas | number:'2.0-0' }}</span>
-        <span class="cdr__sub">horas</span>
-      </div>
-      <span class="cdr__sep">:</span>
-      <div class="cdr__bloque">
-        <span class="cdr__num">{{ timeLeft.minutos | number:'2.0-0' }}</span>
-        <span class="cdr__sub">min</span>
-      </div>
-      <span class="cdr__sep">:</span>
-      <div class="cdr__bloque">
-        <span class="cdr__num">{{ timeLeft.segundos | number:'2.0-0' }}</span>
-        <span class="cdr__sub">seg</span>
-      </div>
-    </div>
-  </div>
-</section>
+<app-hero-fecha [fechaEvento]="fecha"></app-hero-fecha>

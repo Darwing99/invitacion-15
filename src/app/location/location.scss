@@ -25,8 +25,8 @@
   }
 
   &__title {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(2rem, 8vw, 3rem);
+    font-family: var(--font-script);
+    font-size: var(--text-script-lg);
     color: #c05070;
     margin-bottom: 1.25rem;
     text-shadow: 0 1px 6px rgba(255,255,255,0.7);
@@ -37,8 +37,8 @@
     padding: 0.65rem 2.2rem;
     background: #c05070;
     color: #fff;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 0.9rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
     font-weight: 600;
     letter-spacing: 0.18em;
     text-decoration: none;

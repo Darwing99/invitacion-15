@@ -1,0 +1,36 @@
+<section class="fecha" data-aos="fade-up">
+  <img class="fecha__bg" src="src/descarga%20(5).jpg" alt="" aria-hidden="true" />
+  <div class="fecha__body">
+    <div class="fecha__card" data-aos="zoom-in" data-aos-delay="200">
+      <p class="fecha__mes">JUNIO</p>
+      <div class="fecha__row">
+        <span class="fecha__label">SÁBADO</span>
+        <span class="fecha__num">27</span>
+        <span class="fecha__label">6:00 P.M.</span>
+      </div>
+    </div>
+
+    <p class="cdr__hint" data-aos="fade-up" data-aos-delay="300">Tan solo faltan</p>
+    <div class="cdr" data-aos="fade-up" data-aos-delay="400">
+      <div class="cdr__bloque">
+        <span class="cdr__num">{{ timeLeft.dias | number: '2.0-0' }}</span>
+        <span class="cdr__sub">días</span>
+      </div>
+      <span class="cdr__sep">:</span>
+      <div class="cdr__bloque">
+        <span class="cdr__num">{{ timeLeft.horas | number: '2.0-0' }}</span>
+        <span class="cdr__sub">horas</span>
+      </div>
+      <span class="cdr__sep">:</span>
+      <div class="cdr__bloque">
+        <span class="cdr__num">{{ timeLeft.minutos | number: '2.0-0' }}</span>
+        <span class="cdr__sub">min</span>
+      </div>
+      <span class="cdr__sep">:</span>
+      <div class="cdr__bloque">
+        <span class="cdr__num">{{ timeLeft.segundos | number: '2.0-0' }}</span>
+        <span class="cdr__sub">seg</span>
+      </div>
+    </div>
+  </div>
+</section>

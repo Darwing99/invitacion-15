@@ -1,0 +1,19 @@
+.footer {
+  background: linear-gradient(180deg, #fde8f0 0%, #f8d0e0 100%);
+  color: #7a3a50;
+  text-align: center;
+  padding: 1.75rem 1.5rem;
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  line-height: var(--line-height-relaxed);
+
+  strong {
+    color: #c05070;
+  }
+
+  &__email {
+    font-size: var(--text-xs);
+    opacity: 0.75;
+    letter-spacing: 0.03em;
+  }
+}

@@ -1,24 +1,59 @@
 <section class="galeria galeria--deco" id="galeria">
   <h2 class="galeria__titulo" data-aos="fade-down">Momentos especiales</h2>
+
   <div class="galeria__grid">
     @for (photo of photos; track photo.src; let i = $index) {
-      <div class="galeria__item"
-           (click)="open(i)"
-           data-aos="zoom-in"
-           [attr.data-aos-delay]="i * 120">
+      <div class="galeria__item" (click)="open(i)">
         <img [src]="photo.src" [alt]="photo.alt" loading="lazy" />
-        <div class="galeria__overlay">🔍</div>
+        <div class="galeria__overlay">
+          <i class="fa-solid fa-magnifying-glass-plus"></i>
+        </div>
       </div>
     }
   </div>
 
   @if (lightboxOpen) {
-    <div class="lightbox" (click)="close()">
-      <button class="lightbox__close" (click)="close()">✕</button>
-      <button class="lightbox__prev" (click)="$event.stopPropagation(); prev()">‹</button>
-      <img [src]="photos[activeIndex].full" [alt]="photos[activeIndex].alt"
-           (click)="$event.stopPropagation()" />
-      <button class="lightbox__next" (click)="$event.stopPropagation(); next()">›</button>
+    <div
+      class="lightbox"
+      (click)="close()"
+      (touchstart)="onTouchStart($event)"
+      (touchend)="onTouchEnd($event)"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Galería de fotos"
+    >
+      <button class="lightbox__close" (click)="close()" aria-label="Cerrar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <p class="lightbox__counter">
+        {{ activeIndex + 1 }} / {{ photos.length }}
+      </p>
+
+      <button
+        class="lightbox__prev"
+        (click)="$event.stopPropagation(); prev()"
+        aria-label="Foto anterior"
+      >
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <img
+        class="lightbox__img"
+        [src]="photos[activeIndex].full"
+        [alt]="photos[activeIndex].alt"
+        (click)="$event.stopPropagation()"
+      />
+
+      <button
+        class="lightbox__next"
+        (click)="$event.stopPropagation(); next()"
+        aria-label="Foto siguiente"
+      >
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <p class="lightbox__hint">Desliza o usa las flechas ← →</p>
     </div>
   }
 </section>

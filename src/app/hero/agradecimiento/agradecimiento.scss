@@ -1,0 +1,45 @@
+.agradecimiento {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  line-height: 0;
+
+  &__bg {
+    width: 100%;
+    display: block;
+  }
+
+  &__content {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    padding: 3rem 2rem;
+    line-height: var(--line-height-relaxed);
+  }
+
+  &__titulo {
+    font-family: var(--font-script);
+    font-size: var(--text-script-lg);
+    color: #c05070;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    font-weight: 400;
+  }
+
+  &__texto {
+    font-family: var(--font-serif);
+    font-size: var(--text-agradecimiento);
+    color: #5c2535;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  &__cierre {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    color: #7a3a50;
+    letter-spacing: 0.04em;
+  }
+}

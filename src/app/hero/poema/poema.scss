@@ -1,0 +1,33 @@
+.poema {
+  background: #fff8fa;
+  text-align: center;
+  position: relative;
+
+  &--deco {
+    overflow: hidden;
+  }
+
+  &__img-top {
+    width: 100%;
+    overflow: hidden;
+    max-height: 200px;
+    img {
+      width: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+    }
+  }
+
+  &__body {
+    padding: 1.25rem 2.5rem 2.5rem;
+  }
+
+  &__text {
+    font-family: var(--font-serif);
+    font-size: var(--text-poema);
+    font-weight: bold;
+    line-height: var(--line-height-relaxed);
+    color: #5c2535;
+  }
+}

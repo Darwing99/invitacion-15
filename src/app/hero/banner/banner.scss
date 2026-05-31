@@ -1,0 +1,181 @@
+.banner {
+  background: #fde8f0;
+  position: relative;
+
+  &--deco {
+    overflow: hidden;
+  }
+}
+
+.banner__arch {
+  position: relative;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.banner__arch-img {
+  width: 100%;
+  display: block;
+}
+
+// Centro exacto del arco blanco (entre tiara y rosas)
+.banner__heading-wrap {
+  position: absolute;
+  top: 16%;
+  bottom: 46%;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2rem;
+  pointer-events: none;
+}
+
+.banner__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+  width: 100%;
+  perspective: 600px;
+}
+
+.banner__line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.banner__line--spaced {
+  gap: 0.35em;
+  padding-right: 0.35em;
+}
+
+.banner__char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.banner__mis,
+.banner__anos {
+  font-family: var(--font-serif);
+  font-size: clamp(2.85rem, 5vw, 1.55rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #b84868;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 8px rgba(255, 255, 255, 0.6);
+}
+
+.banner__xv {
+  font-family: var(--font-script);
+  font-size: clamp(4.5rem, 18vw, 6.5rem);
+  font-weight: 700;
+  color: #c05070;
+  line-height: 0.9;
+  margin: 0.35rem 0;
+  gap: 0.08em;
+  text-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.85),
+    0 4px 16px rgba(255, 255, 255, 0.5);
+}
+
+.banner__char--script {
+  animation: banner-glow 3.2s ease-in-out infinite;
+
+  &:nth-child(2) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes banner-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(192, 80, 112, 0));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 10px rgba(192, 80, 112, 0.45));
+  }
+}
+
+.banner__player {
+  position: absolute;
+  bottom: 22%;
+  left: 0;
+  right: 0;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.banner__player-hint {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a05068;
+  line-height: 1.4;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.banner__player-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #e04848;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(224, 72, 72, 0.42);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  animation: pulse-red 2s ease infinite;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 22px rgba(224, 72, 72, 0.55);
+    animation: none;
+  }
+
+  &:active {
+    transform: scale(0.93);
+  }
+}
+
+@media (max-width: 360px) {
+  .banner__heading-wrap {
+    top: 15%;
+    bottom: 44%;
+  }
+
+  .banner__xv {
+    font-size: clamp(4rem, 17vw, 5.5rem);
+  }
+
+  .banner__mis,
+  .banner__anos {
+    font-size: clamp(2.85rem, 5vw, 1.35rem);
+  }
+
+  .banner__player {
+    bottom: 20%;
+  }
+}

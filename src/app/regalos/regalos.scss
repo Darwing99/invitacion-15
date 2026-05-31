@@ -1,0 +1,43 @@
+.regalos {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  background: #fff0f5;
+
+  &__bg {
+    width: 100%;
+    display: block;
+    opacity: 0.5;
+  }
+
+  &__content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 2.5rem;
+  }
+
+  &__title {
+    font-family: var(--font-script);
+    font-size: var(--text-script-md);
+    color: #c05070;
+    margin-bottom: 0.8rem;
+  }
+
+  &__text {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    color: #5c2535;
+    line-height: var(--line-height-relaxed);
+    font-style: italic;
+
+    strong {
+      color: #c05070;
+      font-weight: 600;
+      font-style: normal;
+    }
+  }
+}

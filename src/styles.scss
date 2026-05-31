@@ -54,6 +54,31 @@
   }
 }
 
+// ── TIPOGRAFÍA (legible en móvil; mínimos ~14–17px) ───────
+:root {
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-script: 'Dancing Script', cursive;
+  --font-display: 'Playfair Display', serif;
+  --font-vibes: 'Great Vibes', cursive;
+
+  --text-xs: clamp(0.875rem, 2.8vw, 0.9375rem);
+  --text-sm: clamp(0.9375rem, 3.2vw, 1rem);
+  --text-base: clamp(1.525rem, 3.8vw, 1.125rem);
+  --text-agradecimiento: clamp(1.125rem, 4vw, 1.25rem);
+  --text-md: clamp(1.125rem, 4.2vw, 1.25rem);
+  --text-lg: clamp(1.25rem, 5vw, 1.5rem);
+  --text-poema: clamp(1.35rem, 5.5vw, 1.9rem);
+
+  --text-script-sm: clamp(1.75rem, 5vw, 2.2rem);
+  --text-script-md: clamp(2rem, 6.5vw, 2.6rem);
+  --text-script-lg: clamp(2.4rem, 7.5vw, 3rem);
+  --text-hero-xv: clamp(3.5rem, 14vw, 7rem);
+
+  --line-height-body: 1.65;
+  --line-height-relaxed: 1.8;
+  --letter-spacing-label: 0.1em;
+}
+
 *,
 *::before,
 *::after {
@@ -64,15 +89,31 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 100%;
+
+  @media (max-width: 480px) {
+    font-size: 106.25%;
+  }
 }
 
 body {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: var(--line-height-body);
   background: #fff8fa;
   color: #5c2535;
   -webkit-font-smoothing: antialiased;
   max-width: 480px;
   margin: 0 auto;
+}
+
+input,
+select,
+textarea,
+button {
+  font-size: max(1rem, var(--text-base));
 }
 
 img {
@@ -81,17 +122,17 @@ img {
 }
 
 .section-label {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.85rem;
-  letter-spacing: 0.25em;
+  font-family: var(--font-serif);
+  font-size: var(--text-xs);
+  letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
   color: #d97095;
   margin-bottom: 0.4rem;
 }
 
 .section-title {
-  font-family: 'Dancing Script', cursive;
-  font-size: clamp(2rem, 6vw, 2.6rem);
+  font-family: var(--font-script);
+  font-size: var(--text-script-md);
   color: #c05070;
 }
 

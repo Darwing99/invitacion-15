@@ -1,0 +1,42 @@
+<section class="banner banner--deco">
+  <div class="banner__arch">
+    <img class="banner__arch-img" src="src/portada.jpg" alt="" aria-hidden="true" />
+
+    <div class="banner__heading-wrap">
+      <div class="banner__heading">
+        <p class="banner__mis banner__line banner__line--spaced" aria-label="MIS">
+          <span class="banner__char">M</span>
+          <span class="banner__char">I</span>
+          <span class="banner__char">S</span>
+        </p>
+
+        <p class="banner__xv banner__line" aria-label="XV">
+          <span class="banner__char banner__char--script">X</span>
+          <span class="banner__char banner__char--script">V</span>
+        </p>
+
+        <p class="banner__anos banner__line banner__line--spaced" aria-label="AÑOS">
+          <span class="banner__char">A</span>
+          <span class="banner__char">Ñ</span>
+          <span class="banner__char">O</span>
+          <span class="banner__char">S</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="banner__player">
+      <p class="banner__player-hint">dale play, para escuchar la musica</p>
+      <button
+        class="banner__player-btn"
+        (click)="toggleMusic()"
+        [attr.aria-label]="playing ? 'Pausar' : 'Reproducir'"
+      >
+        @if (playing) {
+          <i class="fa-solid fa-pause"></i>
+        } @else {
+          <i class="fa-solid fa-play"></i>
+        }
+      </button>
+    </div>
+  </div>
+</section>
