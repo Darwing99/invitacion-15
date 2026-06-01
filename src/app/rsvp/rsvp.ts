@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 const GUEST_SHEET_CSV =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfHAfCK2YsqN_2MhjTE1n7x5YRQJLuhY6ZtyjisadXW30rV_4UmnauPcWEQvzlkG-0_fzUMDJtNYFy/pub?output=csv';
@@ -56,6 +57,8 @@ type Paso = 'buscar' | 'confirmar' | 'enviado' | 'ya-confirmado' | 'no-encontrad
   styleUrl: './rsvp.scss',
 })
 export class Rsvp {
+  private router = inject(Router);
+
   paso: Paso = 'buscar';
   prefijos = PREFIJOS;
   prefijo = PREFIJOS[0].code;   // +34 España por defecto
@@ -119,6 +122,13 @@ export class Rsvp {
       }
 
       const chosen = available.find(m => m.via === 'telefono') ?? available[0];
+
+      if (chosen.row.invitados === 0) {
+        sessionStorage.setItem('inv_auth', '1');
+        this.router.navigate(['/invitados']);
+        return;
+      }
+
       this.invitadoEncontrado = { telefono: chosen.row.telefono, nombre: chosen.row.nombre, invitados: chosen.row.invitados };
       this.paso = 'confirmar';
     } catch (e) {
@@ -146,7 +156,7 @@ export class Rsvp {
       rows.push({
         telefono: telCol ?? '',
         nombre: nombre ?? '',
-        invitados: parseInt(inv ?? '1', 10) || 1,
+        invitados: inv?.trim() ? parseInt(inv, 10) : 1,
         numerosExtras: extras,
       });
     }
@@ -166,7 +176,7 @@ export class Rsvp {
           telefono: telCol,
           nombre: nombre ?? '',
           asistencia: asistira?.toLowerCase().startsWith('s') ? 'si' : 'no',
-          invitados: parseInt(inv ?? '1', 10) || 1,
+          invitados: inv?.trim() ? parseInt(inv, 10) : 1,
         });
       }
     }

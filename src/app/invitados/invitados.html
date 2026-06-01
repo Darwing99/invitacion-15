@@ -1,0 +1,113 @@
+<div class="inv-page">
+
+  <header class="inv-header">
+    <div class="inv-header__eyebrow">Quinceaños · 27 de Junio 2026</div>
+    <h1 class="inv-header__title">Lista de Invitados</h1>
+    <p class="inv-header__subtitle">Ivana Lilibeth Peralta Garmendia</p>
+  </header>
+
+  @if (!autenticado) {
+    <div class="inv-login">
+      <div class="inv-login__box">
+        <p class="inv-login__label">Ingresa el código de acceso</p>
+        <input
+          class="inv-login__input"
+          [class.inv-login__input--error]="codigoError"
+          type="password"
+          placeholder="Código"
+          [(ngModel)]="codigoInput"
+          (keyup.enter)="verificarCodigo()"
+          autofocus
+        />
+        @if (codigoError) {
+          <p class="inv-login__error">Código incorrecto. Inténtalo de nuevo.</p>
+        }
+        <button class="inv-btn inv-login__btn" (click)="verificarCodigo()">
+          Acceder
+        </button>
+      </div>
+    </div>
+  } @else if (loading) {
+    <div class="inv-state">
+      <div class="inv-spinner"></div>
+      <p>Cargando lista de invitados…</p>
+    </div>
+  } @else if (error) {
+    <div class="inv-state inv-state--error">
+      <p>{{ error }}</p>
+      <button class="inv-btn" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+
+    <div class="inv-stats">
+      <div class="inv-stat">
+        <span class="inv-stat__num">{{ totalGrupos }}</span>
+        <span class="inv-stat__label">Grupos<br>invitados</span>
+      </div>
+      <div class="inv-stat inv-stat--max">
+        <span class="inv-stat__num">{{ totalPersonasMax }}</span>
+        <span class="inv-stat__label">Personas<br>máx.</span>
+      </div>
+      <div class="inv-stat inv-stat--si">
+        <span class="inv-stat__num">{{ personasAsistiran }}</span>
+        <span class="inv-stat__label">Personas<br>asistirán</span>
+      </div>
+      <div class="inv-stat inv-stat--no">
+        <span class="inv-stat__num">{{ gruposConfirmadosNo }}</span>
+        <span class="inv-stat__label">Grupos<br>no asisten</span>
+      </div>
+      <div class="inv-stat inv-stat--pending">
+        <span class="inv-stat__num">{{ pendientes }}</span>
+        <span class="inv-stat__label">Sin<br>responder</span>
+      </div>
+    </div>
+
+    <div class="inv-actions">
+      <span class="inv-updated" *ngIf="ultimaActualizacion">
+        Actualizado: {{ ultimaActualizacion | date:'HH:mm:ss' }}
+      </span>
+      <button class="inv-btn inv-btn--sm" (click)="cargar()">
+        ↻ Actualizar
+      </button>
+    </div>
+
+    <div class="inv-table-wrap">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Cupo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inv of invitados; track inv.telefono; let i = $index) {
+            <tr class="inv-row inv-row--{{ inv.asistira }}">
+              <td class="inv-td--num">{{ i + 1 }}</td>
+              <td class="inv-td--name">{{ inv.nombre }}</td>
+              <td class="inv-td--phone">{{ inv.telefono }}</td>
+              <td class="inv-td--count">
+                @if (inv.asistira === 'si') {
+                  {{ inv.invitadosConfirmados }} / {{ inv.invitadosPermitidos }}
+                } @else {
+                  {{ inv.invitadosPermitidos }}
+                }
+              </td>
+              <td>
+                <span class="inv-badge inv-badge--{{ inv.asistira }}">
+                  @if (inv.asistira === 'si') { Asistirá }
+                  @else if (inv.asistira === 'no') { No asistirá }
+                  @else { Pendiente }
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  }
+
+</div>
