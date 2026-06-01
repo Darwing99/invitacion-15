@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const GUEST_SHEET_CSV =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfHAfCK2YsqN_2MhjTE1n7x5YRQJLuhY6ZtyjisadXW30rV_4UmnauPcWEQvzlkG-0_fzUMDJtNYFy/pub?output=csv';
@@ -183,22 +185,36 @@ export class Rsvp {
     return respuestas;
   }
 
-  confirmar() {
+  async confirmar() {
     if (!this.asistencia || !this.invitadoEncontrado || this.enviando) return;
     this.enviando = true;
 
-    const body = new FormData();
-    body.append(ENTRY_NOMBRE,     this.invitadoEncontrado.nombre);
-    body.append(ENTRY_TELEFONO,   this.invitadoEncontrado.telefono);
-    body.append(ENTRY_INVITADOS,  String(this.invitadoEncontrado.invitados));
-    body.append(ENTRY_ASISTENCIA, this.asistencia === 'si' ? 'Si' : 'No');
+    const inv = this.invitadoEncontrado;
 
+    // Google Form (sin verificación posible por no-cors)
+    const body = new FormData();
+    body.append(ENTRY_NOMBRE,     inv.nombre);
+    body.append(ENTRY_TELEFONO,   inv.telefono);
+    body.append(ENTRY_INVITADOS,  String(inv.invitados));
+    body.append(ENTRY_ASISTENCIA, this.asistencia === 'si' ? 'Si' : 'No');
     fetch(FORM_ACTION, { method: 'POST', mode: 'no-cors', body }).catch(() => {});
 
-    setTimeout(() => {
-      this.enviando = false;
-      this.paso = 'enviado';
-    }, 800);
+    // Firestore (verificado — si falla, seguimos de todas formas)
+    try {
+      const docId = inv.telefono.replace(/\D/g, '');
+      await setDoc(doc(collection(db, 'confirmaciones'), docId), {
+        nombre:     inv.nombre,
+        telefono:   inv.telefono,
+        invitados:  inv.invitados,
+        asistencia: this.asistencia,
+        timestamp:  serverTimestamp(),
+      });
+    } catch (e) {
+      console.error('[RSVP] Error al guardar en Firestore:', e);
+    }
+
+    this.enviando = false;
+    this.paso = 'enviado';
   }
 
   reintentar() {

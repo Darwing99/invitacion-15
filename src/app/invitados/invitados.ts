@@ -1,9 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import ApexCharts from 'apexcharts';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { db } from '../firebase';
 
 const ACCESS_CODE = 'Garely25';
 const SESSION_KEY = 'inv_auth';
+const CACHE_KEY   = 'inv_data_v1';
 
 const GUEST_SHEET_CSV =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfHAfCK2YsqN_2MhjTE1n7x5YRQJLuhY6ZtyjisadXW30rV_4UmnauPcWEQvzlkG-0_fzUMDJtNYFy/pub?output=csv';
@@ -32,6 +38,11 @@ export interface InvitadoStatus {
   invitadosConfirmados: number;
 }
 
+interface Cache {
+  invitados: InvitadoStatus[];
+  timestamp: number;
+}
+
 @Component({
   selector: 'app-invitados',
   imports: [CommonModule, FormsModule],
@@ -39,40 +50,114 @@ export interface InvitadoStatus {
   styleUrl: './invitados.scss',
 })
 export class Invitados implements OnInit, OnDestroy {
+  @ViewChild('donutEl')  donutEl!:  ElementRef;
+  @ViewChild('radialEl') radialEl!: ElementRef;
+
   autenticado = false;
   codigoInput = '';
   codigoError = false;
 
   loading = false;
+  actualizando = false;
+  generandoPdf = false;
   error = '';
   invitados: InvitadoStatus[] = [];
   ultimaActualizacion: Date | null = null;
+  filtro: 'todos' | 'si' | 'no' | 'pendiente' = 'todos';
 
-  get totalGrupos() {
-    return this.invitados.length;
+  // Valores animados para los contadores
+  displayGrupos      = 0;
+  displayPersonasMax = 0;
+  displayAsistiran   = 0;
+  displayNo          = 0;
+  displayPendientes  = 0;
+
+  get invitadosFiltrados() {
+    if (this.filtro === 'todos') return this.invitados;
+    // Los anfitriones (invitadosPermitidos === 0) solo aparecen en "Todos"
+    return this.invitados.filter(i => i.invitadosPermitidos > 0 && i.asistira === this.filtro);
   }
-  get totalPersonasMax() {
-    return this.invitados.reduce((s, i) => s + i.invitadosPermitidos, 0);
+
+  setFiltro(f: typeof this.filtro) {
+    this.filtro = f;
   }
+
+  async imprimir() {
+    if (this.generandoPdf) return;
+    this.generandoPdf = true;
+
+    // Ocultar elementos que no van en el PDF
+    const ocultar = document.querySelectorAll<HTMLElement>('.inv-actions, .inv-filters');
+    ocultar.forEach(el => el.style.display = 'none');
+
+    // Ampliar el body para captura completa
+    const bodyPrev = document.body.style.maxWidth;
+    document.body.style.maxWidth = 'none';
+
+    const pagina = document.querySelector<HTMLElement>('.inv-page')!;
+
+    try {
+      const canvas = await html2canvas(pagina, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        windowWidth: 1100,
+        backgroundColor: '#fff8fa',
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const pdf     = new jsPDF('p', 'mm', 'a4');
+      const pdfW    = pdf.internal.pageSize.getWidth();
+      const pdfH    = pdf.internal.pageSize.getHeight();
+      const imgH    = (canvas.height * pdfW) / canvas.width;
+
+      let offset = 0;
+      let remaining = imgH;
+
+      while (remaining > 0) {
+        if (offset > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -offset, pdfW, imgH);
+        offset    += pdfH;
+        remaining -= pdfH;
+      }
+
+      pdf.save('invitados-ivana-2026.pdf');
+    } finally {
+      ocultar.forEach(el => el.style.display = '');
+      document.body.style.maxWidth = bodyPrev;
+      this.generandoPdf = false;
+    }
+  }
+
+  private donutChart:  ApexCharts | null = null;
+  private radialChart: ApexCharts | null = null;
+
+  // Solo invitados reales (excluye anfitriones con invitadosPermitidos === 0)
+  get invitadosReales()   { return this.invitados.filter(i => i.invitadosPermitidos > 0); }
+
+  get totalGrupos()       { return this.invitadosReales.length; }
+  get totalPersonasMax()  { return this.invitadosReales.reduce((s, i) => s + i.invitadosPermitidos, 0); }
   get personasAsistiran() {
-    return this.invitados
-      .filter(i => i.asistira === 'si')
-      .reduce((s, i) => s + i.invitadosConfirmados, 0);
+    return this.invitadosReales.filter(i => i.asistira === 'si').reduce((s, i) => s + i.invitadosConfirmados, 0);
   }
-  get gruposConfirmadosSi() {
-    return this.invitados.filter(i => i.asistira === 'si').length;
-  }
-  get gruposConfirmadosNo() {
-    return this.invitados.filter(i => i.asistira === 'no').length;
-  }
-  get pendientes() {
-    return this.invitados.filter(i => i.asistira === 'pendiente').length;
+  get gruposConfirmadosSi() { return this.invitadosReales.filter(i => i.asistira === 'si').length; }
+  get gruposConfirmadosNo() { return this.invitadosReales.filter(i => i.asistira === 'no').length; }
+  get pendientes()          { return this.invitadosReales.filter(i => i.asistira === 'pendiente').length; }
+  get pctRespuesta() {
+    if (!this.totalGrupos) return 0;
+    return Math.round(((this.gruposConfirmadosSi + this.gruposConfirmadosNo) / this.totalGrupos) * 100);
   }
 
   ngOnInit() {
     document.body.classList.add('invitados-body');
     this.autenticado = sessionStorage.getItem(SESSION_KEY) === '1';
     if (this.autenticado) this.cargar();
+  }
+
+  ngOnDestroy() {
+    document.body.classList.remove('invitados-body');
+    this.donutChart?.destroy();
+    this.radialChart?.destroy();
   }
 
   verificarCodigo() {
@@ -87,25 +172,47 @@ export class Invitados implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    document.body.classList.remove('invitados-body');
+  async cargar() {
+    const cache = this.leerCache();
+    if (cache) {
+      this.invitados = cache.invitados;
+      this.ultimaActualizacion = new Date(cache.timestamp);
+      this.renderCharts();
+      this.refrescarSilencioso();
+    } else {
+      this.loading = true;
+      await this.fetchYProcesar();
+      this.loading = false;
+    }
   }
 
-  async cargar() {
-    this.loading = true;
-    this.error = '';
+  private async refrescarSilencioso() {
+    this.actualizando = true;
+    await this.fetchYProcesar();
+    this.actualizando = false;
+  }
 
+  private async fetchYProcesar() {
     try {
-      const [guestCsv, respCsv] = await Promise.all([
+      const digitos = (s: string) => s.replace(/\D/g, '');
+
+      const [guestCsv, firestoreConf, respCsv] = await Promise.all([
         this.fetchCsv(GUEST_SHEET_CSV),
+        this.fetchFirestore(),
         this.fetchCsv(RESPONSES_SHEET_CSV).catch(() => ''),
       ]);
 
-      const guests = this.parseGuestCsv(guestCsv);
-      const responses = respCsv ? this.parseRespCsv(respCsv) : [];
+      const guests  = this.parseGuestCsv(guestCsv);
+      const csvConf = respCsv ? this.parseRespCsv(respCsv) : [];
 
-      const digitos = (s: string) => s.replace(/\D/g, '');
-      const respMap = new Map(responses.map(r => [digitos(r.telefono), r]));
+      const firestorePhones = new Set(firestoreConf.map(r => digitos(r.telefono)));
+      const soloEnCsv = csvConf.filter(r => !firestorePhones.has(digitos(r.telefono)));
+      if (soloEnCsv.length > 0) this.migrarAFirestore(soloEnCsv);
+
+      const respMap = new Map<string, Confirmacion>();
+      for (const r of [...csvConf, ...firestoreConf]) {
+        respMap.set(digitos(r.telefono), r);
+      }
 
       this.invitados = guests.map(g => {
         const resp = respMap.get(digitos(g.telefono));
@@ -119,11 +226,164 @@ export class Invitados implements OnInit, OnDestroy {
       });
 
       this.ultimaActualizacion = new Date();
+      this.guardarCache();
+      this.error = '';
+      this.renderCharts();
+      this.animateNumbers();
     } catch {
-      this.error = 'No se pudieron cargar los datos. Intenta de nuevo.';
-    } finally {
-      this.loading = false;
+      if (!this.invitados.length) {
+        this.error = 'No se pudieron cargar los datos. Intenta de nuevo.';
+      }
     }
+  }
+
+  private renderCharts() {
+    setTimeout(() => {
+      this.renderDonut();
+      this.renderRadial();
+    }, 50);
+  }
+
+  private animateNumbers() {
+    this.countUp(v => this.displayGrupos      = v, this.totalGrupos);
+    this.countUp(v => this.displayPersonasMax = v, this.totalPersonasMax);
+    this.countUp(v => this.displayAsistiran   = v, this.personasAsistiran);
+    this.countUp(v => this.displayNo          = v, this.gruposConfirmadosNo);
+    this.countUp(v => this.displayPendientes  = v, this.pendientes);
+  }
+
+  private countUp(setter: (v: number) => void, target: number, duration = 900) {
+    const start = performance.now();
+    const step = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      setter(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  private renderDonut() {
+    if (!this.donutEl?.nativeElement) return;
+
+    const opts: ApexCharts.ApexOptions = {
+      chart: { type: 'donut', height: 260, background: 'transparent', toolbar: { show: false } },
+      series: [this.gruposConfirmadosSi, this.gruposConfirmadosNo, this.pendientes],
+      labels: ['Asistirán', 'No asistirán', 'Pendientes'],
+      colors: ['#66bb6a', '#ef5350', '#b0bec5'],
+      legend: { position: 'bottom', fontFamily: 'Cormorant Garamond, serif', fontSize: '13px' },
+      dataLabels: { style: { fontFamily: 'Cormorant Garamond, serif', fontSize: '13px' } },
+      plotOptions: { pie: { donut: { size: '65%', labels: {
+        show: true,
+        total: {
+          show: true,
+          label: 'Familias',
+          fontFamily: 'Cormorant Garamond, serif',
+          fontSize: '12px',
+          color: '#9e9e9e',
+          formatter: () => String(this.totalGrupos),
+        },
+      }}}},
+      stroke: { width: 2, colors: ['#fff8fa'] },
+      theme: { mode: 'light' },
+    };
+
+    if (this.donutChart) {
+      this.donutChart.updateOptions(opts, true, true);
+    } else {
+      this.donutChart = new ApexCharts(this.donutEl.nativeElement, opts);
+      this.donutChart.render();
+    }
+  }
+
+  private renderRadial() {
+    if (!this.radialEl?.nativeElement) return;
+
+    const pctCapacidad = this.totalPersonasMax
+      ? Math.round((this.personasAsistiran / this.totalPersonasMax) * 100)
+      : 0;
+
+    const opts: ApexCharts.ApexOptions = {
+      chart: { type: 'radialBar', height: 260, background: 'transparent', toolbar: { show: false } },
+      series: [this.pctRespuesta, pctCapacidad],
+      labels: ['Respondieron', 'Capacidad'],
+      colors: ['#c05070', '#9575cd'],
+      plotOptions: { radialBar: {
+        hollow: { size: '30%' },
+        dataLabels: {
+          name:  { fontFamily: 'Cormorant Garamond, serif', fontSize: '12px' },
+          value: { fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', fontWeight: '700',
+                   formatter: (v: number) => v + '%' },
+          total: {
+            show: true,
+            label: 'Asistirán',
+            fontFamily: 'Cormorant Garamond, serif',
+            fontSize: '12px',
+            color: '#9e9e9e',
+            formatter: () => this.personasAsistiran + ' personas',
+          },
+        },
+      }},
+      legend: { show: true, position: 'bottom', fontFamily: 'Cormorant Garamond, serif', fontSize: '13px' },
+      theme: { mode: 'light' },
+    };
+
+    if (this.radialChart) {
+      this.radialChart.updateOptions(opts, true, true);
+    } else {
+      this.radialChart = new ApexCharts(this.radialEl.nativeElement, opts);
+      this.radialChart.render();
+    }
+  }
+
+  private async fetchFirestore(): Promise<Confirmacion[]> {
+    const snap = await getDocs(collection(db, 'confirmaciones'));
+    return snap.docs.map(d => {
+      const data = d.data();
+      return {
+        telefono:   data['telefono']   ?? '',
+        nombre:     data['nombre']     ?? '',
+        asistencia: data['asistencia'] === 'si' ? 'si' : 'no',
+        invitados:  data['invitados']  ?? 1,
+      };
+    });
+  }
+
+  private async migrarAFirestore(confirmaciones: Confirmacion[]) {
+    for (const conf of confirmaciones) {
+      try {
+        const docId = conf.telefono.replace(/\D/g, '');
+        await setDoc(doc(collection(db, 'confirmaciones'), docId), {
+          nombre:     conf.nombre,
+          telefono:   conf.telefono,
+          invitados:  conf.invitados,
+          asistencia: conf.asistencia,
+          timestamp:  serverTimestamp(),
+          migrado:    true,
+        });
+      } catch (e) {
+        console.error('[Invitados] Error al migrar:', e);
+      }
+    }
+  }
+
+  private leerCache(): Cache | null {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw) as Cache;
+    } catch {
+      return null;
+    }
+  }
+
+  private guardarCache() {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        invitados: this.invitados,
+        timestamp: Date.now(),
+      }));
+    } catch {}
   }
 
   private async fetchCsv(url: string): Promise<string> {
@@ -160,10 +420,10 @@ export class Invitados implements OnInit, OnDestroy {
           ) ?? [];
         const [, nombre, telefono, inv, asistira] = cols;
         return {
-          telefono: telefono ?? '',
-          nombre: nombre ?? '',
+          telefono:   telefono ?? '',
+          nombre:     nombre ?? '',
           asistencia: asistira?.toLowerCase().startsWith('s') ? 'si' : 'no',
-          invitados: inv?.trim() ? parseInt(inv, 10) : 1,
+          invitados:  inv?.trim() ? parseInt(inv, 10) : 1,
         } as Confirmacion;
       })
       .filter(r => r.telefono);

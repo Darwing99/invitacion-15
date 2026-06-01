@@ -40,34 +40,64 @@
   } @else {
 
     <div class="inv-stats">
-      <div class="inv-stat">
-        <span class="inv-stat__num">{{ totalGrupos }}</span>
-        <span class="inv-stat__label">Grupos<br>invitados</span>
+      <div class="inv-stat" style="--i:0">
+        <span class="inv-stat__num">{{ displayGrupos }}</span>
+        <span class="inv-stat__label">Familias<br>invitadas</span>
       </div>
-      <div class="inv-stat inv-stat--max">
-        <span class="inv-stat__num">{{ totalPersonasMax }}</span>
+      <div class="inv-stat inv-stat--max" style="--i:1">
+        <span class="inv-stat__num">{{ displayPersonasMax }}</span>
         <span class="inv-stat__label">Personas<br>máx.</span>
       </div>
-      <div class="inv-stat inv-stat--si">
-        <span class="inv-stat__num">{{ personasAsistiran }}</span>
+      <div class="inv-stat inv-stat--si" style="--i:2">
+        <span class="inv-stat__num">{{ displayAsistiran }}</span>
         <span class="inv-stat__label">Personas<br>asistirán</span>
       </div>
-      <div class="inv-stat inv-stat--no">
-        <span class="inv-stat__num">{{ gruposConfirmadosNo }}</span>
-        <span class="inv-stat__label">Grupos<br>no asisten</span>
+      <div class="inv-stat inv-stat--no" style="--i:3">
+        <span class="inv-stat__num">{{ displayNo }}</span>
+        <span class="inv-stat__label">Familias<br>no asisten</span>
       </div>
-      <div class="inv-stat inv-stat--pending">
-        <span class="inv-stat__num">{{ pendientes }}</span>
+      <div class="inv-stat inv-stat--pending" style="--i:4">
+        <span class="inv-stat__num">{{ displayPendientes }}</span>
         <span class="inv-stat__label">Sin<br>responder</span>
+      </div>
+    </div>
+
+    <div class="inv-charts">
+      <div class="inv-chart-card" style="--i:0">
+        <p class="inv-chart-title">Confirmaciones por familia</p>
+        <div #donutEl></div>
+      </div>
+      <div class="inv-chart-card" style="--i:1">
+        <p class="inv-chart-title">Respuesta y capacidad</p>
+        <div #radialEl></div>
       </div>
     </div>
 
     <div class="inv-actions">
       <span class="inv-updated" *ngIf="ultimaActualizacion">
-        Actualizado: {{ ultimaActualizacion | date:'HH:mm:ss' }}
+        @if (actualizando) { <span class="inv-refreshing">↻ actualizando…</span> }
+        @else { {{ ultimaActualizacion | date:'HH:mm:ss' }} }
       </span>
-      <button class="inv-btn inv-btn--sm" (click)="cargar()">
+      <button class="inv-btn inv-btn--sm" [disabled]="actualizando" (click)="cargar()">
         ↻ Actualizar
+      </button>
+      <button class="inv-btn inv-btn--sm inv-btn--print" [disabled]="generandoPdf" (click)="imprimir()">
+        {{ generandoPdf ? 'Generando…' : '⬇ Guardar PDF' }}
+      </button>
+    </div>
+
+    <div class="inv-filters">
+      <button class="inv-filter" [class.inv-filter--active]="filtro === 'todos'" (click)="setFiltro('todos')" style="--i:0">
+        Todos <span class="inv-filter__count">{{ invitados.length }}</span>
+      </button>
+      <button class="inv-filter inv-filter--si" [class.inv-filter--active]="filtro === 'si'" (click)="setFiltro('si')" style="--i:1">
+        Asistirán <span class="inv-filter__count">{{ gruposConfirmadosSi }}</span>
+      </button>
+      <button class="inv-filter inv-filter--no" [class.inv-filter--active]="filtro === 'no'" (click)="setFiltro('no')" style="--i:2">
+        No asisten <span class="inv-filter__count">{{ gruposConfirmadosNo }}</span>
+      </button>
+      <button class="inv-filter inv-filter--pendiente" [class.inv-filter--active]="filtro === 'pendiente'" (click)="setFiltro('pendiente')" style="--i:3">
+        Pendientes <span class="inv-filter__count">{{ pendientes }}</span>
       </button>
     </div>
 
@@ -83,8 +113,8 @@
           </tr>
         </thead>
         <tbody>
-          @for (inv of invitados; track inv.telefono; let i = $index) {
-            <tr class="inv-row inv-row--{{ inv.asistira }}">
+          @for (inv of invitadosFiltrados; track filtro + inv.telefono; let i = $index) {
+            <tr class="inv-row inv-row--{{ inv.asistira }}" [style.--i]="i">
               <td class="inv-td--num">{{ i + 1 }}</td>
               <td class="inv-td--name">{{ inv.nombre }}</td>
               <td class="inv-td--phone">{{ inv.telefono }}</td>
@@ -96,11 +126,15 @@
                 }
               </td>
               <td>
-                <span class="inv-badge inv-badge--{{ inv.asistira }}">
-                  @if (inv.asistira === 'si') { Asistirá }
-                  @else if (inv.asistira === 'no') { No asistirá }
-                  @else { Pendiente }
-                </span>
+                @if (inv.invitadosPermitidos === 0) {
+                  <span class="inv-badge inv-badge--anfitrion">Anfitrión</span>
+                } @else {
+                  <span class="inv-badge inv-badge--{{ inv.asistira }}">
+                    @if (inv.asistira === 'si') { Asistirá }
+                    @else if (inv.asistira === 'no') { No asistirá }
+                    @else { Pendiente }
+                  </span>
+                }
               </td>
             </tr>
           }
