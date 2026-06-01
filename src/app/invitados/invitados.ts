@@ -198,7 +198,7 @@ export class Invitados implements OnInit, OnDestroy {
 
       const [guestCsv, firestoreConf, respCsv] = await Promise.all([
         this.fetchCsv(GUEST_SHEET_CSV),
-        this.fetchFirestore(),
+        this.fetchFirestore().catch(e => { console.warn('[Invitados] Firestore no disponible:', e); return [] as Confirmacion[]; }),
         this.fetchCsv(RESPONSES_SHEET_CSV).catch(() => ''),
       ]);
 
