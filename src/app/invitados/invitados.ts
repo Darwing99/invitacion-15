@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import ApexCharts from 'apexcharts';
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { db } from '../firebase';
 
@@ -60,6 +59,7 @@ export class Invitados implements OnInit, OnDestroy {
   loading = false;
   actualizando = false;
   generandoPdf = false;
+  generandoXlsx = false;
   error = '';
   invitados: InvitadoStatus[] = [];
   ultimaActualizacion: Date | null = null;
@@ -82,50 +82,96 @@ export class Invitados implements OnInit, OnDestroy {
     this.filtro = f;
   }
 
-  async imprimir() {
+  async exportarPdf() {
     if (this.generandoPdf) return;
     this.generandoPdf = true;
-
-    // Ocultar elementos que no van en el PDF
-    const ocultar = document.querySelectorAll<HTMLElement>('.inv-actions, .inv-filters');
-    ocultar.forEach(el => el.style.display = 'none');
-
-    // Ampliar el body para captura completa
-    const bodyPrev = document.body.style.maxWidth;
-    document.body.style.maxWidth = 'none';
-
-    const pagina = document.querySelector<HTMLElement>('.inv-page')!;
-
     try {
-      const canvas = await html2canvas(pagina, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        windowWidth: 1100,
-        backgroundColor: '#fff8fa',
+      const { default: autoTable } = await import('jspdf-autotable');
+      const doc = new jsPDF('p', 'mm', 'a4');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(15);
+      doc.setTextColor(192, 80, 112);
+      doc.text('Lista de Invitados', 14, 18);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      doc.text('Ivana Lilibeth Peralta Garmendia · Quinceaños 27 de Junio 2026', 14, 25);
+      doc.text(`Generado: ${new Date().toLocaleString('es-HN')}`, 14, 30);
+
+      const rows = this.invitadosFiltrados.map((inv, i) => [
+        i + 1,
+        inv.nombre,
+        inv.telefono,
+        inv.invitadosPermitidos === 0
+          ? '—'
+          : inv.asistira === 'si'
+          ? `${inv.invitadosConfirmados} / ${inv.invitadosPermitidos}`
+          : `${inv.invitadosPermitidos}`,
+        inv.invitadosPermitidos === 0
+          ? 'Anfitrión'
+          : inv.asistira === 'si'
+          ? 'Asistirá'
+          : inv.asistira === 'no'
+          ? 'No asistirá'
+          : 'Pendiente',
+      ]);
+
+      autoTable(doc, {
+        startY: 35,
+        head: [['#', 'Nombre', 'Teléfono', 'Cupo', 'Estado']],
+        body: rows,
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [192, 80, 112], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [255, 248, 250] },
+        columnStyles: {
+          0: { cellWidth: 10, halign: 'center' },
+          2: { cellWidth: 32 },
+          3: { cellWidth: 20, halign: 'center' },
+          4: { cellWidth: 28 },
+        },
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf     = new jsPDF('p', 'mm', 'a4');
-      const pdfW    = pdf.internal.pageSize.getWidth();
-      const pdfH    = pdf.internal.pageSize.getHeight();
-      const imgH    = (canvas.height * pdfW) / canvas.width;
-
-      let offset = 0;
-      let remaining = imgH;
-
-      while (remaining > 0) {
-        if (offset > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, -offset, pdfW, imgH);
-        offset    += pdfH;
-        remaining -= pdfH;
-      }
-
-      pdf.save('invitados-ivana-2026.pdf');
+      doc.save('invitados-ivana-2026.pdf');
     } finally {
-      ocultar.forEach(el => el.style.display = '');
-      document.body.style.maxWidth = bodyPrev;
       this.generandoPdf = false;
+    }
+  }
+
+  async exportarXlsx() {
+    if (this.generandoXlsx) return;
+    this.generandoXlsx = true;
+    try {
+      const XLSX = await import('xlsx');
+      const data = this.invitadosFiltrados.map((inv, i) => ({
+        '#': i + 1,
+        Nombre: inv.nombre,
+        'Teléfono': inv.telefono,
+        Cupo:
+          inv.invitadosPermitidos === 0
+            ? 'Anfitrión'
+            : inv.asistira === 'si'
+            ? `${inv.invitadosConfirmados} / ${inv.invitadosPermitidos}`
+            : `${inv.invitadosPermitidos}`,
+        Estado:
+          inv.invitadosPermitidos === 0
+            ? 'Anfitrión'
+            : inv.asistira === 'si'
+            ? 'Asistirá'
+            : inv.asistira === 'no'
+            ? 'No asistirá'
+            : 'Pendiente',
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      ws['!cols'] = [{ wch: 5 }, { wch: 35 }, { wch: 18 }, { wch: 12 }, { wch: 14 }];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Invitados');
+      XLSX.writeFile(wb, 'invitados-ivana-2026.xlsx');
+    } finally {
+      this.generandoXlsx = false;
     }
   }
 

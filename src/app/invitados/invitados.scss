@@ -300,6 +300,11 @@ $white:       #ffffff;
     background: $rose-dark;
     &:hover { background: #3d1520; }
   }
+
+  &--excel {
+    background: #1e7e45;
+    &:hover { background: #145530; }
+  }
 }
 
 // ── Filters ───────────────────────────────────────────────
