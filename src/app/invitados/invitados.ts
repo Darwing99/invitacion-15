@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, serverTimestamp, writeBatch, deleteDoc } from 'firebase/firestore';
 import ApexCharts from 'apexcharts';
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 import { db } from '../firebase';
 
 const ACCESS_CODE = 'Garely25';
@@ -82,51 +83,53 @@ export class Invitados implements OnInit, OnDestroy {
     this.filtro = f;
   }
 
-  async imprimir() {
+  imprimir() {
     if (this.generandoPdf) return;
     this.generandoPdf = true;
 
-    // Ocultar elementos que no van en el PDF
-    const ocultar = document.querySelectorAll<HTMLElement>('.inv-actions, .inv-filters');
-    ocultar.forEach(el => el.style.display = 'none');
-
-    // Ampliar el body para captura completa
-    const bodyPrev = document.body.style.maxWidth;
-    document.body.style.maxWidth = 'none';
-
-    const pagina = document.querySelector<HTMLElement>('.inv-page')!;
-
     try {
-      const canvas = await html2canvas(pagina, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        windowWidth: 1100,
-        backgroundColor: '#fff8fa',
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const fecha = new Date().toLocaleDateString('es-ES');
+
+      pdf.setFontSize(16);
+      pdf.text('Lista de Invitados — Quinceanos Ivana', 105, 14, { align: 'center' });
+      pdf.setFontSize(9);
+      pdf.text(fecha, 105, 20, { align: 'center' });
+
+      autoTable(pdf, {
+        startY: 26,
+        head: [['Nombre', 'Telefono', 'Permitidos', 'Asistira', 'Confirmados']],
+        body: this.invitados.map(i => [
+          i.nombre,
+          i.telefono,
+          i.invitadosPermitidos,
+          i.asistira === 'si' ? 'Si' : i.asistira === 'no' ? 'No' : 'Pendiente',
+          i.invitadosConfirmados,
+        ]),
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { fillColor: [192, 80, 112] },
+        alternateRowStyles: { fillColor: [255, 245, 248] },
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf     = new jsPDF('p', 'mm', 'a4');
-      const pdfW    = pdf.internal.pageSize.getWidth();
-      const pdfH    = pdf.internal.pageSize.getHeight();
-      const imgH    = (canvas.height * pdfW) / canvas.width;
-
-      let offset = 0;
-      let remaining = imgH;
-
-      while (remaining > 0) {
-        if (offset > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, -offset, pdfW, imgH);
-        offset    += pdfH;
-        remaining -= pdfH;
-      }
-
-      pdf.save('invitados-ivana-2026.pdf');
+      pdf.save(`invitados-ivana-${new Date().toISOString().slice(0, 10)}.pdf`);
     } finally {
-      ocultar.forEach(el => el.style.display = '');
-      document.body.style.maxWidth = bodyPrev;
       this.generandoPdf = false;
     }
+  }
+
+  exportarXlsx() {
+    const filas = this.invitados.map(i => ({
+      'Nombre':              i.nombre,
+      'Teléfono':            i.telefono,
+      'Invitados permitidos': i.invitadosPermitidos,
+      'Asistirá':            i.asistira === 'si' ? 'Sí' : i.asistira === 'no' ? 'No' : 'Pendiente',
+      'Personas confirmadas': i.invitadosConfirmados,
+    }));
+
+    const hoja  = XLSX.utils.json_to_sheet(filas);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, 'Invitados');
+    XLSX.writeFile(libro, `invitados-ivana-${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
   private donutChart:  ApexCharts | null = null;
@@ -179,10 +182,12 @@ export class Invitados implements OnInit, OnDestroy {
       this.ultimaActualizacion = new Date(cache.timestamp);
       this.renderCharts();
       this.refrescarSilencioso();
+      this.sincronizarInvitadosCSV();
     } else {
       this.loading = true;
       await this.fetchYProcesar();
       this.loading = false;
+      this.sincronizarInvitadosCSV();
     }
   }
 
@@ -202,7 +207,7 @@ export class Invitados implements OnInit, OnDestroy {
         this.fetchCsv(RESPONSES_SHEET_CSV).catch(() => ''),
       ]);
 
-      const guests  = this.parseGuestCsv(guestCsv);
+      const csvGuests = this.parseGuestCsv(guestCsv);
       const csvConf = respCsv ? this.parseRespCsv(respCsv) : [];
 
       const firestorePhones = new Set(firestoreConf.map(r => digitos(r.telefono)));
@@ -214,7 +219,7 @@ export class Invitados implements OnInit, OnDestroy {
         respMap.set(digitos(r.telefono), r);
       }
 
-      this.invitados = guests.map(g => {
+      this.invitados = csvGuests.map(g => {
         const resp = respMap.get(digitos(g.telefono));
         return {
           nombre: g.nombre,
@@ -347,6 +352,48 @@ export class Invitados implements OnInit, OnDestroy {
         invitados:  data['invitados']  ?? 1,
       };
     });
+  }
+
+  private async sincronizarInvitadosCSV() {
+    try {
+      const csvGuests = this.parseGuestCsv(await this.fetchCsv(GUEST_SHEET_CSV));
+      const fbDocs = await getDocs(collection(db, 'invitados'));
+
+      const fbMap = new Map(fbDocs.docs.map(d => [d.id, d.data()]));
+      const batch = writeBatch(db);
+      const digitos = (s: string) => s.replace(/\D/g, '');
+      let cambios = 0;
+
+      for (const guest of csvGuests) {
+        const docId = digitos(guest.telefono);
+        const fbGuest = fbMap.get(docId);
+
+        if (!fbGuest || fbGuest['nombre'] !== guest.nombre ||
+            fbGuest['invitadosPermitidos'] !== guest.invitadosPermitidos) {
+          batch.set(doc(collection(db, 'invitados'), docId), {
+            nombre: guest.nombre,
+            telefono: guest.telefono,
+            invitadosPermitidos: guest.invitadosPermitidos,
+            syncedAt: serverTimestamp(),
+            source: 'csv'
+          });
+          cambios++;
+        }
+        fbMap.delete(docId);
+      }
+
+      fbMap.forEach((_, docId) => {
+        batch.delete(doc(collection(db, 'invitados'), docId));
+        cambios++;
+      });
+
+      if (cambios > 0) {
+        await batch.commit();
+        console.log('[Invitados] Sincronización completada:', cambios, 'cambios');
+      }
+    } catch (e) {
+      console.warn('[Invitados] Error en sincronización CSV:', e);
+    }
   }
 
   private async migrarAFirestore(confirmaciones: Confirmacion[]) {

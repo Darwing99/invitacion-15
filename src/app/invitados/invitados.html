@@ -82,7 +82,10 @@
         ↻ Actualizar
       </button>
       <button class="inv-btn inv-btn--sm inv-btn--print" [disabled]="generandoPdf" (click)="imprimir()">
-        {{ generandoPdf ? 'Generando…' : '⬇ Guardar PDF' }}
+        {{ generandoPdf ? 'Generando…' : '⬇ Exportar PDF' }}
+      </button>
+      <button class="inv-btn inv-btn--sm inv-btn--xlsx" (click)="exportarXlsx()">
+        ⬇ Exportar Excel
       </button>
     </div>
 
