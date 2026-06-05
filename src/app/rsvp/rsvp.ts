@@ -100,10 +100,10 @@ export class Rsvp {
       if (confSnap.exists()) {
         const data = confSnap.data();
         this.confirmacionPrevia = {
-          telefono:   data['telefono']   ?? chosen.row.telefono,
-          nombre:     data['nombre']     ?? chosen.row.nombre,
+          telefono: data['telefono'] ?? chosen.row.telefono,
+          nombre: data['nombre'] ?? chosen.row.nombre,
           asistencia: data['asistencia'] === 'si' ? 'si' : 'no',
-          invitados:  data['invitados']  ?? 1,
+          invitados: data['invitados'] ?? 1,
         };
         this.invitadoEncontrado = { telefono: chosen.row.telefono, nombre: chosen.row.nombre, invitados: chosen.row.invitados };
         this.asistencia = this.confirmacionPrevia.asistencia;
@@ -142,9 +142,9 @@ export class Rsvp {
       const [telCol, nombre, inv, ...rest] = cols;
       const extras = rest.flatMap(s => s.split(',')).map(s => s.trim()).filter(Boolean);
       rows.push({
-        telefono:      telCol ?? '',
-        nombre:        nombre ?? '',
-        invitados:     inv?.trim() ? parseInt(inv, 10) : 1,
+        telefono: telCol ?? '',
+        nombre: nombre ?? '',
+        invitados: inv?.trim() ? parseInt(inv, 10) : 1,
         numerosExtras: extras,
       });
     }

@@ -39,39 +39,41 @@
     </div>
   } @else {
 
-    <div class="inv-stats">
-      <div class="inv-stat" style="--i:0">
-        <span class="inv-stat__num">{{ displayGrupos }}</span>
-        <span class="inv-stat__label">Familias<br>invitadas</span>
+    @if (invitados.length > 0) {
+      <div class="inv-stats">
+        <div class="inv-stat" style="--i:0">
+          <span class="inv-stat__num">{{ displayGrupos }}</span>
+          <span class="inv-stat__label">Familias<br>invitadas</span>
+        </div>
+        <div class="inv-stat inv-stat--max" style="--i:1">
+          <span class="inv-stat__num">{{ displayPersonasMax }}</span>
+          <span class="inv-stat__label">Personas<br>máx.</span>
+        </div>
+        <div class="inv-stat inv-stat--si" style="--i:2">
+          <span class="inv-stat__num">{{ displayAsistiran }}</span>
+          <span class="inv-stat__label">Personas<br>asistirán</span>
+        </div>
+        <div class="inv-stat inv-stat--no" style="--i:3">
+          <span class="inv-stat__num">{{ displayNo }}</span>
+          <span class="inv-stat__label">Familias<br>no asisten</span>
+        </div>
+        <div class="inv-stat inv-stat--pending" style="--i:4">
+          <span class="inv-stat__num">{{ displayPendientes }}</span>
+          <span class="inv-stat__label">Sin<br>responder</span>
+        </div>
       </div>
-      <div class="inv-stat inv-stat--max" style="--i:1">
-        <span class="inv-stat__num">{{ displayPersonasMax }}</span>
-        <span class="inv-stat__label">Personas<br>máx.</span>
-      </div>
-      <div class="inv-stat inv-stat--si" style="--i:2">
-        <span class="inv-stat__num">{{ displayAsistiran }}</span>
-        <span class="inv-stat__label">Personas<br>asistirán</span>
-      </div>
-      <div class="inv-stat inv-stat--no" style="--i:3">
-        <span class="inv-stat__num">{{ displayNo }}</span>
-        <span class="inv-stat__label">Familias<br>no asisten</span>
-      </div>
-      <div class="inv-stat inv-stat--pending" style="--i:4">
-        <span class="inv-stat__num">{{ displayPendientes }}</span>
-        <span class="inv-stat__label">Sin<br>responder</span>
-      </div>
-    </div>
 
-    <div class="inv-charts">
-      <div class="inv-chart-card" style="--i:0">
-        <p class="inv-chart-title">Confirmaciones por familia</p>
-        <div #donutEl></div>
+      <div class="inv-charts">
+        <div class="inv-chart-card" style="--i:0">
+          <p class="inv-chart-title">Confirmaciones por familia</p>
+          <div #donutEl></div>
+        </div>
+        <div class="inv-chart-card" style="--i:1">
+          <p class="inv-chart-title">Respuesta y capacidad</p>
+          <div #radialEl></div>
+        </div>
       </div>
-      <div class="inv-chart-card" style="--i:1">
-        <p class="inv-chart-title">Respuesta y capacidad</p>
-        <div #radialEl></div>
-      </div>
-    </div>
+    }
 
     <div class="inv-actions">
       <span class="inv-updated" *ngIf="ultimaActualizacion">

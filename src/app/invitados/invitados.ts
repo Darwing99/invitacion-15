@@ -141,7 +141,7 @@ export class Invitados implements OnInit, OnDestroy {
   get totalGrupos()       { return this.invitadosReales.length; }
   get totalPersonasMax()  { return this.invitadosReales.reduce((s, i) => s + i.invitadosPermitidos, 0); }
   get personasAsistiran() {
-    return this.invitadosReales.filter(i => i.asistira === 'si').reduce((s, i) => s + i.invitadosConfirmados, 0);
+    return this.invitadosReales.filter(i => i.asistira === 'si').reduce((s, i) => s + i.invitadosPermitidos, 0);
   }
   get gruposConfirmadosSi() { return this.invitadosReales.filter(i => i.asistira === 'si').length; }
   get gruposConfirmadosNo() { return this.invitadosReales.filter(i => i.asistira === 'no').length; }
@@ -181,20 +181,61 @@ export class Invitados implements OnInit, OnDestroy {
       this.invitados = cache.invitados;
       this.ultimaActualizacion = new Date(cache.timestamp);
       this.renderCharts();
-      this.refrescarSilencioso();
-      this.sincronizarInvitadosCSV();
+      this.animateNumbers();
     } else {
       this.loading = true;
-      await this.fetchYProcesar();
-      this.loading = false;
-      this.sincronizarInvitadosCSV();
+    }
+    await this.fetchDesdeFirestore();
+    this.loading = false;
+    this.sincronizarInvitadosCSV();
+  }
+
+  private async fetchDesdeFirestore() {
+    try {
+      const digitos = (s: string) => s.replace(/\D/g, '');
+      const [guests, confs] = await Promise.all([
+        this.fetchFirestoreGuests(),
+        this.fetchFirestore().catch(() => [] as Confirmacion[]),
+      ]);
+
+      if (guests.length === 0) {
+        await this.fetchYProcesar();
+        return;
+      }
+
+      const respMap = new Map<string, Confirmacion>();
+      for (const r of confs) respMap.set(digitos(r.telefono), r);
+
+      this.invitados = guests.map(g => {
+        const resp = respMap.get(digitos(g.telefono));
+        return {
+          nombre:               g.nombre,
+          telefono:             g.telefono,
+          invitadosPermitidos:  g.invitadosPermitidos,
+          asistira:             resp ? resp.asistencia : 'pendiente',
+          invitadosConfirmados: resp ? resp.invitados  : 0,
+        };
+      });
+
+      this.ultimaActualizacion = new Date();
+      this.guardarCache();
+      this.error = '';
+      this.renderCharts();
+      this.animateNumbers();
+    } catch {
+      if (!this.invitados.length) {
+        await this.fetchYProcesar();
+      }
     }
   }
 
-  private async refrescarSilencioso() {
-    this.actualizando = true;
-    await this.fetchYProcesar();
-    this.actualizando = false;
+  private async fetchFirestoreGuests(): Promise<GuestRow[]> {
+    const snap = await getDocs(collection(db, 'invitados'));
+    return snap.docs.map(d => ({
+      nombre:               d.data()['nombre']               ?? '',
+      telefono:             d.data()['telefono']             ?? '',
+      invitadosPermitidos:  d.data()['invitadosPermitidos']  ?? 1,
+    }));
   }
 
   private async fetchYProcesar() {
