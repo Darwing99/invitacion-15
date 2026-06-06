@@ -2,7 +2,8 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { supabase } from '../supabase';
+import { db } from '../firebase';
+import { collection, getDocs, getDoc, doc, setDoc } from 'firebase/firestore';
 
 export interface Invitado {
   telefono: string;
@@ -62,36 +63,29 @@ export class Rsvp {
       const digitos = (s: string) => s.replace(/\D/g, '');
       const phonesToTry = [digitos(this.prefijo + tel), digitos(tel)];
 
-      const { data, error } = await supabase
-        .from('invitados')
-        .select('id, nombre, telefono, invitados_permitidos, numeros_extras');
-
-      if (error) throw error;
-
-      const allRows = (data ?? []) as Array<{
+      const snapshot = await getDocs(collection(db, 'invitados'));
+      const allRows = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as {
         id: string;
         nombre: string;
         telefono: string;
-        invitados_permitidos: number;
-        numeros_extras: string[];
-      }>;
+        invitadosPermitidos: number;
+        numerosExtras?: string[];
+      }));
 
       let found: typeof allRows[0] | null = null;
       for (const row of allRows) {
         if (phonesToTry.includes(digitos(row.telefono))) { found = row; break; }
-        const extras = (row.numeros_extras ?? []).map(digitos);
+        const extras = (row.numerosExtras ?? []).map(digitos);
         if (phonesToTry.some(p => extras.includes(p))) { found = row; break; }
       }
 
       if (!found) { this.paso = 'no-encontrado'; this.cdr.detectChanges(); return; }
 
-      const { data: confData } = await supabase
-        .from('confirmaciones')
-        .select('telefono, nombre, asistencia, invitados')
-        .eq('telefono', found.telefono)
-        .maybeSingle();
+      const confKey = digitos(found.telefono);
+      const confSnap = await getDoc(doc(db, 'confirmaciones', confKey));
 
-      if (confData) {
+      if (confSnap.exists()) {
+        const confData = confSnap.data();
         this.confirmacionPrevia = {
           telefono:   confData['telefono'],
           nombre:     confData['nombre'],
@@ -99,9 +93,9 @@ export class Rsvp {
           invitados:  confData['invitados'],
         };
         this.invitadoEncontrado = {
-          telefono: found.telefono,
-          nombre:   found.nombre,
-          invitados: found.invitados_permitidos,
+          telefono:  found.telefono,
+          nombre:    found.nombre,
+          invitados: found.invitadosPermitidos,
         };
         this.asistencia = this.confirmacionPrevia.asistencia;
         this.paso = 'ya-confirmado';
@@ -109,16 +103,16 @@ export class Rsvp {
         return;
       }
 
-      if (found.invitados_permitidos === 0) {
+      if (found.invitadosPermitidos === 0) {
         sessionStorage.setItem('inv_auth', '1');
         this.router.navigate(['/invitados']);
         return;
       }
 
       this.invitadoEncontrado = {
-        telefono: found.telefono,
-        nombre:   found.nombre,
-        invitados: found.invitados_permitidos,
+        telefono:  found.telefono,
+        nombre:    found.nombre,
+        invitados: found.invitadosPermitidos,
       };
       this.paso = 'confirmar';
       this.cdr.detectChanges();
@@ -138,17 +132,16 @@ export class Rsvp {
     const inv = this.invitadoEncontrado;
 
     try {
-      const { error } = await supabase.from('confirmaciones').upsert(
-        {
-          telefono:   inv.telefono,
-          nombre:     inv.nombre,
-          invitados:  inv.invitados,
-          asistencia: this.asistencia,
-        },
-        { onConflict: 'telefono' }
-      );
+      const digitos = (s: string) => s.replace(/\D/g, '');
+      const confKey = digitos(inv.telefono);
 
-      if (error) throw error;
+      await setDoc(doc(db, 'confirmaciones', confKey), {
+        telefono:   inv.telefono,
+        nombre:     inv.nombre,
+        invitados:  inv.invitados,
+        asistencia: this.asistencia,
+      }, { merge: true });
+
       this.paso = 'enviado';
       this.cdr.detectChanges();
     } catch (e) {

@@ -5,20 +5,21 @@ import ApexCharts from 'apexcharts';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { supabase } from '../supabase';
+import { db } from '../firebase';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 
 const ACCESS_CODE = 'Garely25';
 const SESSION_KEY = 'inv_auth';
 
-interface SupabaseGuest {
+interface FirestoreGuest {
   id: string;
   nombre: string;
   telefono: string;
-  invitados_permitidos: number;
-  numeros_extras: string[];
+  invitadosPermitidos: number;
+  numerosExtras?: string[];
 }
 
-interface SupabaseConfirmacion {
+interface FirestoreConfirmacion {
   telefono: string;
   asistencia: 'si' | 'no';
   invitados: number;
@@ -29,6 +30,7 @@ export interface InvitadoStatus {
   nombre: string;
   telefono: string;
   invitadosPermitidos: number;
+  numerosExtras: string[];
   asistira: 'si' | 'no' | 'pendiente';
   invitadosConfirmados: number;
 }
@@ -131,29 +133,26 @@ export class Invitados implements OnInit, OnDestroy {
     this.actualizando = true;
     if (!this.invitados.length) this.loading = true;
 
-    await this.fetchDesdeSupabase();
+    await this.fetchDesdeFirebase();
     this.loading = false;
     this.actualizando = false;
-    this.renderCharts();
     this.cdr.detectChanges();
+    this.renderCharts();
   }
 
-  private async fetchDesdeSupabase() {
+  private async fetchDesdeFirebase() {
     try {
       const digitos = (s: string) => s.replace(/\D/g, '');
 
-      const [guestsRes, confsRes] = await Promise.all([
-        supabase.from('invitados').select('id, nombre, telefono, invitados_permitidos, numeros_extras').order('nombre'),
-        supabase.from('confirmaciones').select('telefono, asistencia, invitados'),
+      const [guestsSnap, confsSnap] = await Promise.all([
+        getDocs(query(collection(db, 'invitados'), orderBy('nombre'))),
+        getDocs(collection(db, 'confirmaciones')),
       ]);
 
-      if (guestsRes.error) throw guestsRes.error;
-      if (confsRes.error) throw confsRes.error;
+      const guests = guestsSnap.docs.map(d => ({ id: d.id, ...d.data() } as FirestoreGuest));
+      const confs  = confsSnap.docs.map(d => d.data() as FirestoreConfirmacion);
 
-      const guests = (guestsRes.data ?? []) as SupabaseGuest[];
-      const confs  = (confsRes.data ?? []) as SupabaseConfirmacion[];
-
-      const confMap = new Map<string, SupabaseConfirmacion>();
+      const confMap = new Map<string, FirestoreConfirmacion>();
       for (const c of confs) confMap.set(digitos(c.telefono), c);
 
       this.invitados = guests.map(g => {
@@ -162,7 +161,8 @@ export class Invitados implements OnInit, OnDestroy {
           id:                   g.id,
           nombre:               g.nombre,
           telefono:             g.telefono,
-          invitadosPermitidos:  g.invitados_permitidos,
+          invitadosPermitidos:  g.invitadosPermitidos ?? 0,
+          numerosExtras:        g.numerosExtras ?? [],
           asistira:             conf ? conf.asistencia : 'pendiente',
           invitadosConfirmados: conf ? conf.invitados  : 0,
         };
@@ -171,7 +171,7 @@ export class Invitados implements OnInit, OnDestroy {
       this.ultimaActualizacion = new Date();
       this.error = '';
     } catch (e: any) {
-      console.error('[Invitados] Error Supabase:', e);
+      console.error('[Invitados] Error Firebase:', e);
       if (!this.invitados.length) {
         this.error = 'No se pudieron cargar los datos. Intenta de nuevo.';
       }
@@ -195,7 +195,7 @@ export class Invitados implements OnInit, OnDestroy {
       nombre:               inv.nombre,
       telefono:             inv.telefono,
       invitadosPermitidos:  inv.invitadosPermitidos,
-      numerosExtras:        '',
+      numerosExtras:        inv.numerosExtras.join(', '),
     };
     this.errorModal = '';
     this.mostrarModal = true;
@@ -217,42 +217,22 @@ export class Invitados implements OnInit, OnDestroy {
     try {
       const extras = numerosExtras.split(',').map(s => s.trim()).filter(Boolean);
       const payload = {
-        nombre:               nombre.trim(),
-        telefono:             telefono.trim(),
-        invitados_permitidos: invitadosPermitidos,
-        numeros_extras:       extras,
+        nombre:              nombre.trim(),
+        telefono:            telefono.trim(),
+        invitadosPermitidos: invitadosPermitidos,
+        numerosExtras:       extras,
       };
 
       if (this.modoEdicion && this.editandoId) {
-        const { error } = await supabase.from('invitados').update(payload).eq('id', this.editandoId);
-        if (error) throw error;
-
-        const idx = this.invitados.findIndex(i => i.id === this.editandoId);
-        if (idx !== -1) {
-          this.invitados[idx] = {
-            ...this.invitados[idx],
-            nombre:              payload.nombre,
-            telefono:            payload.telefono,
-            invitadosPermitidos: payload.invitados_permitidos,
-          };
-        }
+        await updateDoc(doc(db, 'invitados', this.editandoId), payload);
       } else {
-        const { data, error } = await supabase.from('invitados').insert(payload).select('id').single();
-        if (error) throw error;
-
-        this.invitados.push({
-          id:                  data['id'],
-          nombre:              payload.nombre,
-          telefono:            payload.telefono,
-          invitadosPermitidos: payload.invitados_permitidos,
-          asistira:            'pendiente',
-          invitadosConfirmados: 0,
-        });
-        this.invitados.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+        await addDoc(collection(db, 'invitados'), payload);
       }
 
-      this.renderCharts();
+      await this.fetchDesdeFirebase();
       this.cerrarModal();
+      this.cdr.detectChanges();
+      this.renderCharts();
     } catch (e: any) {
       this.errorModal = e.message ?? 'Error al guardar.';
     } finally {
@@ -265,10 +245,10 @@ export class Invitados implements OnInit, OnDestroy {
     if (!confirm(`¿Eliminar a ${inv.nombre}?`)) return;
     this.eliminando = inv.id;
     try {
-      const { error } = await supabase.from('invitados').delete().eq('id', inv.id);
-      if (error) throw error;
+      await deleteDoc(doc(db, 'invitados', inv.id));
 
-      await this.fetchDesdeSupabase();
+      await this.fetchDesdeFirebase();
+      this.cdr.detectChanges();
       this.renderCharts();
     } catch (e: any) {
       this.error = e.message ?? 'Error al eliminar.';
