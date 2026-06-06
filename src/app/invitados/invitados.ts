@@ -78,13 +78,6 @@ export class Invitados implements OnInit, OnDestroy {
   editandoId: string | null = null;
   formData: FormData = { nombre: '', telefono: '', invitadosPermitidos: 1, numerosExtras: '' };
 
-  // Animated counters
-  displayGrupos      = 0;
-  displayPersonasMax = 0;
-  displayAsistiran   = 0;
-  displayNo          = 0;
-  displayPendientes  = 0;
-
   private donutChart:  ApexCharts | null = null;
   private radialChart: ApexCharts | null = null;
 
@@ -148,7 +141,6 @@ export class Invitados implements OnInit, OnDestroy {
         this.invitados = cache.invitados;
         this.ultimaActualizacion = new Date(cache.timestamp);
         this.renderCharts();
-        this.animateNumbers();
       }
       // Si el cache es reciente, no re-fetches
       if (Date.now() - cache.timestamp < CACHE_TTL_MS) {
@@ -163,6 +155,7 @@ export class Invitados implements OnInit, OnDestroy {
     await this.fetchDesdeSupabase();
     this.loading = false;
     this.actualizando = false;
+    this.renderCharts();
   }
 
   private async fetchDesdeSupabase() {
@@ -198,8 +191,6 @@ export class Invitados implements OnInit, OnDestroy {
       this.ultimaActualizacion = new Date();
       this.guardarCache();
       this.error = '';
-      this.renderCharts();
-      this.animateNumbers();
     } catch (e: any) {
       console.error('[Invitados] Error Supabase:', e);
       if (!this.invitados.length) {
@@ -283,7 +274,6 @@ export class Invitados implements OnInit, OnDestroy {
 
       this.guardarCache();
       this.renderCharts();
-      this.animateNumbers();
       this.cerrarModal();
     } catch (e: any) {
       this.errorModal = e.message ?? 'Error al guardar.';
@@ -302,7 +292,6 @@ export class Invitados implements OnInit, OnDestroy {
       this.invitados = this.invitados.filter(i => i.id !== inv.id);
       this.guardarCache();
       this.renderCharts();
-      this.animateNumbers();
     } catch (e: any) {
       this.error = e.message ?? 'Error al eliminar.';
     } finally {
@@ -360,24 +349,6 @@ export class Invitados implements OnInit, OnDestroy {
 
   private renderCharts() {
     setTimeout(() => { this.renderDonut(); this.renderRadial(); }, 50);
-  }
-
-  private animateNumbers() {
-    this.countUp(v => this.displayGrupos      = v, this.totalGrupos);
-    this.countUp(v => this.displayPersonasMax = v, this.totalPersonasMax);
-    this.countUp(v => this.displayAsistiran   = v, this.personasAsistiran);
-    this.countUp(v => this.displayNo          = v, this.gruposConfirmadosNo);
-    this.countUp(v => this.displayPendientes  = v, this.pendientes);
-  }
-
-  private countUp(setter: (v: number) => void, target: number, duration = 900) {
-    const start = performance.now();
-    const step = (now: number) => {
-      const p = Math.min((now - start) / duration, 1);
-      setter(Math.round(target * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
   }
 
   private renderDonut() {

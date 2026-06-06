@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -38,6 +38,7 @@ type Paso = 'buscar' | 'confirmar' | 'enviado' | 'ya-confirmado' | 'no-encontrad
 })
 export class Rsvp {
   private router = inject(Router);
+  private cdr    = inject(ChangeDetectorRef);
 
   paso: Paso = 'buscar';
   prefijos = PREFIJOS;
@@ -81,7 +82,7 @@ export class Rsvp {
         if (phonesToTry.some(p => extras.includes(p))) { found = row; break; }
       }
 
-      if (!found) { this.paso = 'no-encontrado'; return; }
+      if (!found) { this.paso = 'no-encontrado'; this.cdr.detectChanges(); return; }
 
       const { data: confData } = await supabase
         .from('confirmaciones')
@@ -103,6 +104,7 @@ export class Rsvp {
         };
         this.asistencia = this.confirmacionPrevia.asistencia;
         this.paso = 'ya-confirmado';
+        this.cdr.detectChanges();
         return;
       }
 
@@ -118,11 +120,14 @@ export class Rsvp {
         invitados: found.invitados_permitidos,
       };
       this.paso = 'confirmar';
+      this.cdr.detectChanges();
     } catch (e) {
       console.error('[RSVP] Error al buscar:', e);
       this.errorMsg = 'Error de conexión. Intenta de nuevo.';
+      this.cdr.detectChanges();
     } finally {
       this.buscando = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -138,18 +143,20 @@ export class Rsvp {
           nombre:     inv.nombre,
           invitados:  inv.invitados,
           asistencia: this.asistencia,
-          updated_at: new Date().toISOString(),
         },
         { onConflict: 'telefono' }
       );
 
       if (error) throw error;
       this.paso = 'enviado';
+      this.cdr.detectChanges();
     } catch (e) {
       console.error('[RSVP] Error al guardar:', e);
       this.errorMsg = 'Error al guardar. Intenta de nuevo.';
+      this.cdr.detectChanges();
     } finally {
       this.enviando = false;
+      this.cdr.detectChanges();
     }
   }
 
