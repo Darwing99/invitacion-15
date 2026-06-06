@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import ApexCharts from 'apexcharts';
@@ -9,8 +9,6 @@ import { supabase } from '../supabase';
 
 const ACCESS_CODE = 'Garely25';
 const SESSION_KEY = 'inv_auth';
-const CACHE_KEY   = 'inv_data_v2';
-const CACHE_TTL_MS = 2 * 60 * 1000;
 
 interface SupabaseGuest {
   id: string;
@@ -35,11 +33,6 @@ export interface InvitadoStatus {
   invitadosConfirmados: number;
 }
 
-interface Cache {
-  invitados: InvitadoStatus[];
-  timestamp: number;
-}
-
 interface FormData {
   nombre: string;
   telefono: string;
@@ -54,6 +47,8 @@ interface FormData {
   styleUrl: './invitados.scss',
 })
 export class Invitados implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
   @ViewChild('donutEl')  donutEl!:  ElementRef;
   @ViewChild('radialEl') radialEl!: ElementRef;
 
@@ -134,28 +129,13 @@ export class Invitados implements OnInit, OnDestroy {
 
   async cargar() {
     this.actualizando = true;
-    const cache = this.leerCache();
-
-    if (cache) {
-      if (!this.invitados.length) {
-        this.invitados = cache.invitados;
-        this.ultimaActualizacion = new Date(cache.timestamp);
-        this.renderCharts();
-      }
-      // Si el cache es reciente, no re-fetches
-      if (Date.now() - cache.timestamp < CACHE_TTL_MS) {
-        this.loading = false;
-        this.actualizando = false;
-        return;
-      }
-    } else if (!this.invitados.length) {
-      this.loading = true;
-    }
+    if (!this.invitados.length) this.loading = true;
 
     await this.fetchDesdeSupabase();
     this.loading = false;
     this.actualizando = false;
     this.renderCharts();
+    this.cdr.detectChanges();
   }
 
   private async fetchDesdeSupabase() {
@@ -189,7 +169,6 @@ export class Invitados implements OnInit, OnDestroy {
       });
 
       this.ultimaActualizacion = new Date();
-      this.guardarCache();
       this.error = '';
     } catch (e: any) {
       console.error('[Invitados] Error Supabase:', e);
@@ -272,13 +251,13 @@ export class Invitados implements OnInit, OnDestroy {
         this.invitados.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
       }
 
-      this.guardarCache();
       this.renderCharts();
       this.cerrarModal();
     } catch (e: any) {
       this.errorModal = e.message ?? 'Error al guardar.';
     } finally {
       this.guardando = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -289,13 +268,13 @@ export class Invitados implements OnInit, OnDestroy {
       const { error } = await supabase.from('invitados').delete().eq('id', inv.id);
       if (error) throw error;
 
-      this.invitados = this.invitados.filter(i => i.id !== inv.id);
-      this.guardarCache();
+      await this.fetchDesdeSupabase();
       this.renderCharts();
     } catch (e: any) {
       this.error = e.message ?? 'Error al eliminar.';
     } finally {
       this.eliminando = null;
+      this.cdr.detectChanges();
     }
   }
 
@@ -395,18 +374,4 @@ export class Invitados implements OnInit, OnDestroy {
     else { this.radialChart = new ApexCharts(this.radialEl.nativeElement, opts); this.radialChart.render(); }
   }
 
-  // ── Cache ─────────────────────────────────────────────────
-
-  private leerCache(): Cache | null {
-    try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      return raw ? JSON.parse(raw) as Cache : null;
-    } catch { return null; }
-  }
-
-  private guardarCache() {
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ invitados: this.invitados, timestamp: Date.now() }));
-    } catch {}
-  }
 }
