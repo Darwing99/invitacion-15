@@ -434,6 +434,153 @@ $white:       #ffffff;
   &--anfitrion  { background: #ede7f6;   color: #512da8;             font-weight: 700; }
 }
 
+// ── Action buttons in table ───────────────────────────────
+.inv-th--actions,
+.inv-td--actions {
+  text-align: center;
+  white-space: nowrap;
+  width: 90px;
+}
+
+.inv-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+  line-height: 1;
+
+  &:hover { background: #f3eaed; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.inv-btn--agregar {
+  background: #2e7d32;
+  &:hover { background: #1b5e20; }
+}
+
+.inv-btn--ghost {
+  background: transparent;
+  color: $rose-dark;
+  border: 1.5px solid $rose-light;
+  &:hover { background: $rose-light; }
+}
+
+// ── Modal ─────────────────────────────────────────────────
+.inv-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(92, 37, 53, 0.35);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: inv-fade-in 0.2s ease both;
+}
+
+.inv-modal {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(92, 37, 53, 0.2);
+  width: 100%;
+  max-width: 440px;
+  animation: inv-scale-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 0;
+  }
+
+  &__title {
+    font-family: var(--font-vibes);
+    font-size: 1.6rem;
+    color: $rose-dark;
+    margin: 0;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: $gray;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+    &:hover { background: $rose-light; color: $rose-dark; }
+  }
+
+  &__body {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0 1.5rem 1.25rem;
+  }
+
+  &__error {
+    font-family: var(--font-serif);
+    font-size: 0.82rem;
+    color: $red;
+    margin: 0;
+  }
+}
+
+.inv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  &__label {
+    font-family: var(--font-serif);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #575757;
+  }
+
+  &__opt {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: $gray;
+  }
+
+  &__input {
+    padding: 0.6rem 0.9rem;
+    border: 1.5px solid $rose-light;
+    border-radius: 8px;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: $rose-dark;
+    background: $cream;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+
+    &:focus { border-color: $rose-mid; }
+  }
+
+  &__hint {
+    font-family: var(--font-serif);
+    font-size: 0.72rem;
+    color: $gray;
+  }
+}
+
 // ── Print / PDF ───────────────────────────────────────────
 @media print {
   // Forzar colores de fondo en la impresión

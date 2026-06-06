@@ -84,10 +84,13 @@
         ↻ Actualizar
       </button>
       <button class="inv-btn inv-btn--sm inv-btn--print" [disabled]="generandoPdf" (click)="imprimir()">
-        {{ generandoPdf ? 'Generando…' : '⬇ Exportar PDF' }}
+        {{ generandoPdf ? 'Generando…' : '⬇ PDF' }}
       </button>
       <button class="inv-btn inv-btn--sm inv-btn--xlsx" (click)="exportarXlsx()">
-        ⬇ Exportar Excel
+        ⬇ Excel
+      </button>
+      <button class="inv-btn inv-btn--sm inv-btn--agregar" (click)="abrirAgregar()">
+        + Agregar
       </button>
     </div>
 
@@ -115,10 +118,11 @@
             <th>Teléfono</th>
             <th>Cupo</th>
             <th>Estado</th>
+            <th class="inv-th--actions">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          @for (inv of invitadosFiltrados; track filtro + inv.telefono; let i = $index) {
+          @for (inv of invitadosFiltrados; track filtro + inv.id; let i = $index) {
             <tr class="inv-row inv-row--{{ inv.asistira }}" [style.--i]="i">
               <td class="inv-td--num">{{ i + 1 }}</td>
               <td class="inv-td--name">{{ inv.nombre }}</td>
@@ -141,12 +145,93 @@
                   </span>
                 }
               </td>
+              <td class="inv-td--actions">
+                <button class="inv-icon-btn inv-icon-btn--edit" (click)="abrirEditar(inv)" title="Editar">✏️</button>
+                <button
+                  class="inv-icon-btn inv-icon-btn--delete"
+                  (click)="eliminarInvitado(inv)"
+                  [disabled]="eliminando === inv.id"
+                  title="Eliminar"
+                >
+                  @if (eliminando === inv.id) { ⏳ } @else { 🗑️ }
+                </button>
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
 
+  }
+
+  <!-- ── Modal agregar / editar ── -->
+  @if (mostrarModal) {
+    <div class="inv-modal-overlay" (click)="cerrarModal()">
+      <div class="inv-modal" (click)="$event.stopPropagation()">
+        <div class="inv-modal__header">
+          <h3 class="inv-modal__title">{{ modoEdicion ? 'Editar invitado' : 'Agregar invitado' }}</h3>
+          <button class="inv-modal__close" (click)="cerrarModal()">✕</button>
+        </div>
+
+        <div class="inv-modal__body">
+          <div class="inv-field">
+            <label class="inv-field__label">Nombre *</label>
+            <input
+              class="inv-field__input"
+              type="text"
+              placeholder="Nombre completo"
+              [(ngModel)]="formData.nombre"
+              (keyup.enter)="guardarInvitado()"
+            />
+          </div>
+
+          <div class="inv-field">
+            <label class="inv-field__label">Teléfono *</label>
+            <input
+              class="inv-field__input"
+              type="tel"
+              placeholder="+504 9999-9999"
+              [(ngModel)]="formData.telefono"
+              (keyup.enter)="guardarInvitado()"
+            />
+          </div>
+
+          <div class="inv-field">
+            <label class="inv-field__label">Cupo de personas</label>
+            <input
+              class="inv-field__input"
+              type="number"
+              min="0"
+              max="20"
+              [(ngModel)]="formData.invitadosPermitidos"
+            />
+            <span class="inv-field__hint">Usa 0 para anfitrión (acceso admin)</span>
+          </div>
+
+          <div class="inv-field">
+            <label class="inv-field__label">Teléfonos extra <span class="inv-field__opt">(opcional)</span></label>
+            <input
+              class="inv-field__input"
+              type="text"
+              placeholder="+504 8888-8888, +34 612 345 678"
+              [(ngModel)]="formData.numerosExtras"
+            />
+            <span class="inv-field__hint">Separados por coma. Permiten buscar RSVP con estos números también.</span>
+          </div>
+
+          @if (errorModal) {
+            <p class="inv-modal__error">{{ errorModal }}</p>
+          }
+        </div>
+
+        <div class="inv-modal__footer">
+          <button class="inv-btn inv-btn--ghost" (click)="cerrarModal()">Cancelar</button>
+          <button class="inv-btn" (click)="guardarInvitado()" [disabled]="guardando">
+            {{ guardando ? 'Guardando…' : (modoEdicion ? 'Guardar cambios' : 'Agregar invitado') }}
+          </button>
+        </div>
+      </div>
+    </div>
   }
 
 </div>
